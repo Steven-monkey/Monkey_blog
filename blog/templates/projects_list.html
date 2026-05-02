@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}小项目{% endblock %}
+{% block content %}
+<section class="hero">
+    <h1>小项目</h1>
+    <p>可在 front matter 里写 <code>repo</code> / <code>demo</code> 链接。</p>
+</section>
+{% if items %}
+<div class="card-grid">
+    {% for p in items %}
+    <article class="card">
+        <h2><a href="{{ url_for('project_detail', slug=p.slug) }}">{{ p.title }}</a></h2>
+        <div class="card-meta">{{ p.date }}</div>
+        <p>{{ p.summary }}</p>
+        <div class="links-row">
+            {% if p.repo_url %}<a class="btn-outline" href="{{ p.repo_url }}" target="_blank" rel="noopener">仓库</a>{% endif %}
+            {% if p.demo_url %}<a class="btn-outline" href="{{ p.demo_url }}" target="_blank" rel="noopener">演示</a>{% endif %}
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<p class="empty">还没有项目页。</p>
+{% endif %}
+{% endblock %}

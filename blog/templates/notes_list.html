@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}学习笔记{% endblock %}
+{% block content %}
+<section class="hero">
+    <h1>学习笔记</h1>
+    <p>按日期倒序排列，数据来自 SQLite（启动时从 Markdown 同步）。</p>
+</section>
+{% if items %}
+<div class="card-grid">
+    {% for n in items %}
+    <article class="card">
+        <h2><a href="{{ url_for('note_detail', slug=n.slug) }}">{{ n.title }}</a></h2>
+        <div class="card-meta">{{ n.date }}</div>
+        <p>{{ n.summary }}</p>
+        {% if n.tags %}
+        <div class="tags">
+            {% for t in n.tags %}
+            <span class="tag">{{ t }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<p class="empty">还没有笔记。</p>
+{% endif %}
+{% endblock %}

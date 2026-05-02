@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}首页 · 个人博客{% endblock %}
+{% block content %}
+<section class="hero">
+    <h1>你好，这是个人站点</h1>
+    <p>用来整理学习笔记、展示小实验；侧边「智慧箴言」沿用原来的 AI 箴言与配图能力。内容来自 Markdown，启动时同步到 SQLite。</p>
+    <div style="margin-top:1rem">
+        <a href="{{ url_for('ai_search_page') }}" class="btn-primary" style="display:inline-block;padding:0.6rem 1.2rem;border-radius:10px;background:linear-gradient(135deg,#2c4a7c,#3d5a8a);color:white;text-decoration:none;font-weight:600;font-size:0.95rem;">🔍 AI 智能搜索</a>
+    </div>
+</section>
+
+<h2 class="section-title">最近笔记</h2>
+{% if notes %}
+<div class="card-grid">
+    {% for n in notes[:6] %}
+    <article class="card">
+        <h2><a href="{{ url_for('note_detail', slug=n.slug) }}">{{ n.title }}</a></h2>
+        <div class="card-meta">{{ n.date }}</div>
+        <p>{{ n.summary }}</p>
+        {% if n.tags %}
+        <div class="tags">
+            {% for t in n.tags %}
+            <span class="tag">{{ t }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<p class="empty">暂无笔记，请在 <code>content/notes/</code> 添加 Markdown 后重启服务。</p>
+{% endif %}
+
+<h2 class="section-title">最近项目</h2>
+{% if projects %}
+<div class="card-grid">
+    {% for p in projects[:4] %}
+    <article class="card">
+        <h2><a href="{{ url_for('project_detail', slug=p.slug) }}">{{ p.title }}</a></h2>
+        <div class="card-meta">{{ p.date }}</div>
+        <p>{{ p.summary }}</p>
+        <div class="links-row">
+            {% if p.repo_url %}<a class="btn-outline" href="{{ p.repo_url }}" target="_blank" rel="noopener">仓库</a>{% endif %}
+            {% if p.demo_url %}<a class="btn-outline" href="{{ p.demo_url }}" target="_blank" rel="noopener">演示</a>{% endif %}
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<p class="empty">暂无项目，请在 <code>content/projects/</code> 添加 Markdown。</p>
+{% endif %}
+
+<p class="footer-note">部署：<code>docker compose up --build</code> · SQLite：<span style="color: {% if db_ok %}#1a7f37{% else %}#b42318{% endif %}">{{ "可用" if db_ok else "不可用" }}</span></p>
+{% endblock %}

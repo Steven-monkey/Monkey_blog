@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}个人博客{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='site.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+<header class="site-header">
+    <div class="site-header-inner">
+        <div class="brand"><a href="{{ url_for('blog_home') }}">学习笔记 · 小项目</a></div>
+        <nav class="nav" aria-label="主导航">
+            <a href="{{ url_for('blog_home') }}">首页</a>
+            <a href="{{ url_for('notes_list') }}">笔记</a>
+            <a href="{{ url_for('projects_list') }}">项目</a>
+            <a href="{{ url_for('ai_search_page') }}">🔍 AI 搜索</a>
+            <a href="{{ url_for('wisdom_page') }}">智慧箴言</a>
+        </nav>
+    </div>
+</header>
+<main>
+    {% block content %}{% endblock %}
+</main>
+</body>
+</html>

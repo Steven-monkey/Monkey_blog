@@ -1,0 +1,495 @@
+{% extends "base.html" %}
+{% block title %}智慧箴言 · AI{% endblock %}
+{% block extra_head %}
+<style>
+    main { max-width: none !important; padding: 0 !important; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    .wisdom-standalone {
+        min-height: calc(100vh - 56px);
+        background: linear-gradient(135deg, #f5f7ff 0%, #e9eefc 50%, #dfe6fa 100%);
+        font-family: 'Segoe UI', 'Roboto', 'Noto Sans', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+        display: flex; align-items: center; justify-content: center; padding: 1.5rem; position: relative;
+    }
+    .wisdom-standalone::before {
+        content: ""; position: absolute; width: 100%; height: 100%;
+        background: radial-gradient(circle at 20% 30%, rgba(170, 200, 255, 0.25), transparent 70%);
+        pointer-events: none;
+    }
+    .wisdom-card {
+        max-width: 720px; width: 100%; background: rgba(255, 255, 255, 0.94);
+        backdrop-filter: blur(2px); border-radius: 2.5rem;
+        box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.05);
+        padding: 2rem; transition: transform 0.25s ease, box-shadow 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.6); position: relative; z-index: 1;
+    }
+    .wisdom-card:hover { transform: translateY(-5px); box-shadow: 0 30px 55px -15px rgba(0, 0, 0, 0.3); }
+    .card-header {
+        display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap;
+        margin-bottom: 1.5rem; border-bottom: 2px dashed rgba(100, 108, 145, 0.25); padding-bottom: 0.75rem;
+    }
+    .title {
+        font-size: 1.8rem; font-weight: 700; background: linear-gradient(120deg, #2c3e66, #4b6a9b);
+        background-clip: text; -webkit-background-clip: text; color: transparent; letter-spacing: -0.3px;
+        display: inline-flex; align-items: center; gap: 8px;
+    }
+    .title span { font-size: 1.9rem; }
+    .live-clock {
+        font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace; font-size: 0.85rem;
+        background: rgba(70, 90, 126, 0.12); padding: 0.3rem 0.9rem; border-radius: 40px; color: #2c3e66;
+        font-weight: 500; backdrop-filter: blur(2px);
+    }
+    .quote-container { margin: 2rem 0 1.5rem; text-align: center; transition: all 0.2s ease; }
+    .scene-wrapper {
+        width: min(100%, 360px);
+        margin: 0.6rem auto 1.2rem;
+        border-radius: 1.2rem;
+        overflow: hidden;
+        box-shadow: 0 14px 28px rgba(31, 47, 78, 0.2);
+        position: relative;
+        border: 1px solid rgba(255, 255, 255, 0.45);
+        background: linear-gradient(145deg, #f2f5ff 0%, #dfe6fa 100%);
+    }
+    .scene-image {
+        width: 100%;
+        aspect-ratio: 9 / 16;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.35s ease, filter 0.35s ease;
+        filter: saturate(1.05) contrast(1.03);
+    }
+    .scene-wrapper:hover .scene-image { transform: scale(1.02); }
+    .scene-tag {
+        position: absolute;
+        left: 10px;
+        bottom: 10px;
+        padding: 0.25rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        color: #eef3ff;
+        background: rgba(18, 33, 58, 0.72);
+        backdrop-filter: blur(2px);
+    }
+    .quote-icon { font-size: 3rem; opacity: 0.6; color: #6078a8; line-height: 1; margin-bottom: 0.5rem; }
+    .quote-text {
+        font-size: 1.85rem;
+        line-height: 1.55;
+        font-weight: 500;
+        color: #1e2a44;
+        margin: 0.75rem 0 1rem;
+        word-break: break-word;
+        letter-spacing: 0.5px;
+    }
+    .quote-author {
+        font-size: 1rem; color: #5c6f96; text-align: right; margin-top: 0.5rem;
+        border-top: 1px solid rgba(100, 108, 145, 0.2); display: inline-block; width: auto;
+        padding-top: 0.65rem; padding-right: 0.5rem;
+    }
+    .author-prefix { font-weight: 300; margin-right: 4px; }
+    .button-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin: 1.5rem 0 0.8rem; }
+    .btn {
+        border: none; padding: 0.85rem 1.8rem; border-radius: 60px; font-size: 1rem; font-weight: 600;
+        cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: all 0.25s ease;
+        backdrop-filter: blur(4px); letter-spacing: 0.5px; background: white; box-shadow: 0 5px 12px rgba(53, 76, 114, 0.12);
+    }
+    .btn-primary {
+        background: linear-gradient(105deg, #ffffff 0%, #f0f4ff 100%); color: #2c3e66;
+        border: 1px solid rgba(100, 108, 145, 0.25);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(52, 78, 120, 0.2); }
+    .btn-deepseek {
+        background: linear-gradient(115deg, #1a2b4c, #0e1a2f); color: #eef3ff; border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    .btn-deepseek:hover { background: linear-gradient(115deg, #244068, #15273f); transform: translateY(-2px); }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.65; cursor: wait; }
+    .api-section {
+        margin-top: 1.2rem; display: flex; justify-content: center; align-items: center; gap: 0.8rem;
+        flex-wrap: wrap; font-size: 0.75rem; border-top: 1px dashed rgba(100, 108, 145, 0.25); padding-top: 1rem;
+    }
+    .api-status {
+        background: rgba(70, 90, 126, 0.08); padding: 0.25rem 0.8rem; border-radius: 30px; color: #4a5b7e;
+        font-weight: 500; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .mini-btn {
+        background: rgba(100, 108, 145, 0.1); border: none; font-size: 0.72rem; cursor: pointer;
+        color: #62748e; padding: 0.25rem 0.6rem; border-radius: 20px; transition: 0.2s;
+    }
+    .mini-btn:hover { background: rgba(100, 108, 145, 0.25); color: #1f2f4e; }
+    .status-tip { margin-top: 0.7rem; text-align: center; min-height: 1.2rem; color: #5c6f96; font-size: 0.85rem; }
+    .status-tip.error { color: #b64949; }
+    .footer-note { margin-top: 1.2rem; text-align: center; font-size: 0.7rem; color: #7b8baa; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+    @keyframes gentleFade { 0% { opacity: 0.5; transform: translateY(6px); } 100% { opacity: 1; transform: translateY(0); } }
+    .quote-animate { animation: gentleFade 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards; }
+    .loader {
+        display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%; border-top-color: #c0d4ff; border-right-color: #c0d4ff; animation: spin 0.8s linear infinite;
+        margin-left: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 550px) {
+        .wisdom-card { padding: 1.4rem; }
+        .quote-text { font-size: 1.5rem; }
+        .btn { padding: 0.6rem 1.2rem; font-size: 0.9rem; }
+        .button-group { gap: 0.7rem; }
+        .title { font-size: 1.4rem; }
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="wisdom-standalone">
+<div class="wisdom-card" id="wisdomCard">
+    <div class="card-header">
+        <div class="title"><span>✨</span> 智慧箴言</div>
+        <div class="live-clock" id="liveClock">加载时间...</div>
+    </div>
+
+    <div class="quote-container" id="quoteContainer">
+        <div class="scene-wrapper">
+            <img
+                class="scene-image"
+                id="sceneImage"
+                src="https://image.pollinations.ai/prompt/%E6%9F%94%E5%92%8C%E6%99%A8%E5%85%89%EF%BC%8C%E6%9E%97%E9%97%B4%E8%96%84%E9%9B%BE%EF%BC%8C%E7%A6%85%E6%84%8F%E6%84%8F%E5%A2%83%EF%BC%8C%E7%AB%96%E5%B1%8F%E8%83%8C%E6%99%AF%E5%9B%BE?width=1080&height=1920&nologo=true&enhance=true&safe=true"
+                alt="与箴言意境呼应的背景图"
+                loading="lazy"
+            >
+            <div class="scene-tag">9:16 · 1080x1920</div>
+        </div>
+        <div class="quote-icon">“</div>
+        <div class="quote-text" id="quoteText">每一个微小进步，都值得热烈鼓掌。</div>
+        <div class="quote-author" id="quoteAuthor">—— 灵境回声</div>
+    </div>
+
+    <div class="button-group">
+        <button type="button" class="btn btn-primary" id="localQuoteBtn">🌿 经典箴言库</button>
+        <button type="button" class="btn btn-deepseek" id="deepseekQuoteBtn">🌐 AI 全球箴言</button>
+        <button type="button" class="btn btn-primary" id="downloadImageBtn">⬇️ 下载背景图</button>
+        <button type="button" class="btn btn-primary" id="downloadPosterBtn">🖼️ 下载箴言海报</button>
+    </div>
+
+    <div class="api-section">
+        <div class="api-status" id="apiStatusDisplay">🔍 正在检查后端配置...</div>
+        <button type="button" class="mini-btn" id="refreshStatusBtn">🔄 刷新状态</button>
+    </div>
+
+    <div class="status-tip" id="statusTip"></div>
+
+    <div class="footer-note">
+        <span>🌍 收录全球哲思</span>
+        <span>🧠 AI 智慧引擎</span>
+        <span>📜 经典·原创·洞见</span>
+    </div>
+</div>
+</div>
+<script>
+    const LOCAL_WISDOM_LIBRARY = [
+        { text: "你生来就是一团火焰，不要甘心只做烟雾。", author: "非洲谚语" },
+        { text: "你无法阻挡巨浪，但你可以学会冲浪。", author: "乔·卡巴金" },
+        { text: "即使是最深的黑夜，也无法吞噬一颗星星。", author: "土耳其谚语" },
+        { text: "所谓勇气，就是压力之下展现的优雅。", author: "海明威" },
+        { text: "当你站在悬崖边，风会教你飞翔。", author: "尼采" },
+        { text: "不要把心铺在道路上，要种在田野里。", author: "鲁米" },
+        { text: "我来了，我看见了，我征服了。", author: "凯撒" },
+        { text: "不要为已经打翻的牛奶哭泣。", author: "西方谚语" },
+        { text: "你的伤口是光进入你内心的地方。", author: "鲁米" },
+        { text: "活着，就是不断创造新的回忆。", author: "村上春树" }
+    ];
+
+    const quoteTextEl = document.getElementById("quoteText");
+    const quoteAuthorEl = document.getElementById("quoteAuthor");
+    const localBtn = document.getElementById("localQuoteBtn");
+    const deepseekBtn = document.getElementById("deepseekQuoteBtn");
+    const quoteContainerDiv = document.getElementById("quoteContainer");
+    const sceneImageEl = document.getElementById("sceneImage");
+    const liveClockEl = document.getElementById("liveClock");
+    const apiStatusDisplay = document.getElementById("apiStatusDisplay");
+    const refreshStatusBtn = document.getElementById("refreshStatusBtn");
+    const statusTipEl = document.getElementById("statusTip");
+    const downloadImageBtn = document.getElementById("downloadImageBtn");
+    const downloadPosterBtn = document.getElementById("downloadPosterBtn");
+
+    let currentLocalIndex = -1;
+    let isFetchingDeepSeek = false;
+    let clockInterval = null;
+    let activeSyncTaskId = 0;
+
+    function updateClock() {
+        const now = new Date();
+        const weekdays = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
+        liveClockEl.textContent = `${year}.${month}.${day} ${weekdays[now.getDay()]} ${hours}:${minutes}:${seconds}`;
+    }
+
+    function applyQuoteAnimation() {
+        quoteContainerDiv.classList.remove("quote-animate");
+        void quoteContainerDiv.offsetWidth;
+        quoteContainerDiv.classList.add("quote-animate");
+        setTimeout(() => quoteContainerDiv.classList.remove("quote-animate"), 350);
+    }
+
+    function displayQuote(text, author) {
+        quoteTextEl.textContent = text;
+        quoteAuthorEl.innerHTML = `<span class="author-prefix">——</span> ${author || "未知来源"}`;
+        applyQuoteAnimation();
+    }
+
+    function updateSceneImage(url) {
+        if (!url) return;
+        sceneImageEl.src = url;
+    }
+
+    function preloadImage(url) {
+        return new Promise((resolve, reject) => {
+            if (!url) {
+                reject(new Error("图片地址为空"));
+                return;
+            }
+            const img = new Image();
+            img.onload = () => resolve(url);
+            img.onerror = () => reject(new Error("图片加载失败"));
+            img.src = url;
+        });
+    }
+
+    async function loadBackgroundByQuote(text, author) {
+        try {
+            const params = new URLSearchParams({ text: text || "", author: author || "" });
+            const res = await fetch(`/api/wisdom/background?${params.toString()}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            return data?.image_url || "";
+        } catch (error) {
+            console.error("请求 /api/wisdom/background 失败:", error);
+            return "";
+        }
+    }
+
+    async function applyQuoteWithSyncedImage({ text, author, imageUrl, loadingMessage }) {
+        const taskId = ++activeSyncTaskId;
+        setStatus(loadingMessage || "正在同步生成箴言和背景图...");
+        let finalImageUrl = imageUrl;
+        if (!finalImageUrl) {
+            finalImageUrl = await loadBackgroundByQuote(text, author);
+        }
+        if (!finalImageUrl) {
+            throw new Error("未获取到背景图地址");
+        }
+        await preloadImage(finalImageUrl);
+        if (taskId !== activeSyncTaskId) return;
+        updateSceneImage(finalImageUrl);
+        displayQuote(text, author);
+    }
+
+    function downloadCurrentImage() {
+        const imageUrl = sceneImageEl?.src || "";
+        if (!imageUrl) {
+            setStatus("当前暂无可下载的背景图。", true);
+            return;
+        }
+        const link = document.createElement("a");
+        link.href = `/api/wisdom/download-image?url=${encodeURIComponent(imageUrl)}`;
+        link.click();
+        setStatus("正在下载当前背景图...");
+    }
+
+    function wrapCanvasText(ctx, text, maxWidth) {
+        const chars = Array.from(text || "");
+        const lines = [];
+        let line = "";
+        for (const ch of chars) {
+            const testLine = `${line}${ch}`;
+            if (ctx.measureText(testLine).width > maxWidth && line) {
+                lines.push(line);
+                line = ch;
+            } else {
+                line = testLine;
+            }
+        }
+        if (line) lines.push(line);
+        return lines;
+    }
+
+    function loadImage(url) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = url;
+        });
+    }
+
+    async function downloadPoster() {
+        const imageUrl = sceneImageEl?.src || "";
+        const quoteText = quoteTextEl?.textContent?.trim() || "";
+        const quoteAuthor = quoteAuthorEl?.textContent?.replace(/^——\s*/, "").trim() || "未知来源";
+        if (!imageUrl || !quoteText) {
+            setStatus("当前内容不足，无法生成海报。", true);
+            return;
+        }
+        try {
+            setStatus("正在生成箴言海报...");
+            const parsed = new URL(imageUrl, window.location.origin);
+            const isSameOrigin = parsed.origin === window.location.origin;
+            const imageSourceUrl = isSameOrigin
+                ? parsed.pathname + parsed.search
+                : `/api/wisdom/image-proxy?url=${encodeURIComponent(imageUrl)}`;
+            const bg = await loadImage(imageSourceUrl);
+
+            const canvas = document.createElement("canvas");
+            canvas.width = 1080;
+            canvas.height = 1920;
+            const ctx = canvas.getContext("2d");
+
+            ctx.drawImage(bg, 0, 0, canvas.width, canvas.height);
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, "rgba(10, 18, 33, 0.20)");
+            gradient.addColorStop(0.55, "rgba(10, 18, 33, 0.34)");
+            gradient.addColorStop(1, "rgba(10, 18, 33, 0.70)");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const contentPadding = 96;
+            const textMaxWidth = canvas.width - contentPadding * 2;
+            const quoteFontSize = 56;
+            const lineHeight = 84;
+            ctx.fillStyle = "#f4f7ff";
+            ctx.textBaseline = "top";
+            ctx.font = `600 ${quoteFontSize}px "Segoe UI", "Noto Sans SC", sans-serif`;
+            const quoteLines = wrapCanvasText(ctx, quoteText, textMaxWidth);
+            const blockHeight = quoteLines.length * lineHeight + 96;
+            let y = canvas.height - blockHeight - 200;
+
+            quoteLines.forEach((line) => {
+                ctx.fillText(line, contentPadding, y);
+                y += lineHeight;
+            });
+            ctx.font = '400 38px "Segoe UI", "Noto Sans SC", sans-serif';
+            ctx.fillStyle = "rgba(240, 245, 255, 0.95)";
+            ctx.fillText(`—— ${quoteAuthor}`, contentPadding, y + 24);
+            ctx.font = '400 24px "Segoe UI", "Noto Sans SC", sans-serif';
+            ctx.fillStyle = "rgba(223, 232, 252, 0.9)";
+            ctx.fillText("智慧箴言 · 1080x1920", contentPadding, canvas.height - 64);
+
+            const link = document.createElement("a");
+            const ts = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15);
+            link.download = `wisdom-poster-${ts}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+            setStatus("箴言海报已生成并开始下载。");
+        } catch (error) {
+            console.error("生成海报失败:", error);
+            setStatus("海报生成失败，请稍后重试。", true);
+        }
+    }
+
+    function setStatus(message, isError = false) {
+        statusTipEl.textContent = message || "";
+        statusTipEl.classList.toggle("error", Boolean(isError));
+    }
+
+    function getRandomLocalWisdom() {
+        let newIndex = Math.floor(Math.random() * LOCAL_WISDOM_LIBRARY.length);
+        if (LOCAL_WISDOM_LIBRARY.length > 1 && newIndex === currentLocalIndex) {
+            newIndex = (newIndex + 1) % LOCAL_WISDOM_LIBRARY.length;
+        }
+        currentLocalIndex = newIndex;
+        return LOCAL_WISDOM_LIBRARY[currentLocalIndex];
+    }
+
+    function handleLocalQuote() {
+        const wisdom = getRandomLocalWisdom();
+        applyQuoteWithSyncedImage({
+            text: wisdom.text,
+            author: wisdom.author,
+            loadingMessage: "正在同步生成本地箴言和背景图...",
+        })
+            .then(() => setStatus("已同步更新本地箴言与背景图。"))
+            .catch((error) => {
+                displayQuote(wisdom.text, wisdom.author);
+                setStatus(`背景图同步失败：${error.message || "未知错误"}`, true);
+            });
+    }
+
+    async function refreshApiStatus() {
+        try {
+            const res = await fetch("/api/llm/status");
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (data.configured) {
+                const quoteModel = data.quote_model || data.model || "chat-model";
+                const imageModel = data.image_model || "default";
+                const imageProvider = data.image_provider || "openai-compatible";
+                const imageKeyTag = data.image_configured ? "已配置Key" : "未配置Key";
+                apiStatusDisplay.textContent = `🔮 箴言模型：${quoteModel} ｜ 🎨 生图：${imageProvider}/${imageModel}（${imageKeyTag}）`;
+                apiStatusDisplay.style.color = "#2a6b47";
+            } else {
+                apiStatusDisplay.textContent = "⚠️ AI 引擎：后端未完成配置";
+                apiStatusDisplay.style.color = "#a5613a";
+            }
+        } catch (error) {
+            apiStatusDisplay.textContent = "❌ 无法获取后端配置状态";
+            apiStatusDisplay.style.color = "#b64949";
+            console.error("读取状态失败:", error);
+        }
+    }
+
+    async function handleDeepSeekQuote() {
+        if (isFetchingDeepSeek) return;
+        isFetchingDeepSeek = true;
+        const originalText = deepseekBtn.innerHTML;
+        deepseekBtn.innerHTML = "🌐 沉思中 <span class='loader'></span>";
+        deepseekBtn.disabled = true;
+        setStatus("正在向后端请求 AI 灵感内容...");
+        try {
+            const res = await fetch("/api/llm/wisdom");
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (!data || !data.text) throw new Error("返回内容缺少 text 字段");
+            const finalAuthor = data.author || "AI 灵感引擎";
+            await applyQuoteWithSyncedImage({
+                text: data.text,
+                author: finalAuthor,
+                imageUrl: data.image_url || "",
+                loadingMessage: "正在同步生成 AI 箴言与背景图...",
+            });
+            if (data.source === "fallback") {
+                setStatus(data.note || "AI 服务暂不可用，已回退到本地内容。", true);
+            } else {
+                setStatus("已同步生成 AI 箴言与背景图。");
+            }
+        } catch (error) {
+            setStatus(`调用失败：${error.message || "未知错误"}`, true);
+            console.error("请求 /api/llm/wisdom 失败:", error);
+        } finally {
+            isFetchingDeepSeek = false;
+            deepseekBtn.innerHTML = originalText;
+            deepseekBtn.disabled = false;
+        }
+    }
+
+    function init() {
+        updateClock();
+        clockInterval = setInterval(updateClock, 1000);
+        handleLocalQuote();
+        refreshApiStatus();
+        localBtn.addEventListener("click", handleLocalQuote);
+        deepseekBtn.addEventListener("click", handleDeepSeekQuote);
+        downloadImageBtn.addEventListener("click", downloadCurrentImage);
+        downloadPosterBtn.addEventListener("click", downloadPoster);
+        refreshStatusBtn.addEventListener("click", refreshApiStatus);
+        window.addEventListener("beforeunload", () => clearInterval(clockInterval));
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
+</script>
+{% endblock %}
