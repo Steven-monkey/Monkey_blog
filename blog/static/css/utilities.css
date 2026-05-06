@@ -1,14 +1,16 @@
 /* ═══════════════════════════════════════════════════
-   Utilities: 空状态、页脚、辅助类
+   Utilities: 空状态、工具类
    ═══════════════════════════════════════════════════ */
 
 .empty {
-  color: var(--muted);
+  color: var(--text-tertiary);
   font-size: 0.95rem;
+  padding: 2rem 0;
 }
 
 .footer-note {
   margin-top: 3rem;
   font-size: 0.8rem;
-  color: var(--muted);
+  color: var(--text-tertiary);
+  text-align: center;
 }

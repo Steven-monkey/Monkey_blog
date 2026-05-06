@@ -45,7 +45,9 @@ def _init_schema(conn: sqlite3.Connection) -> None:
             tags_json TEXT NOT NULL,
             summary TEXT NOT NULL,
             body_md TEXT NOT NULL,
-            html TEXT NOT NULL
+            html TEXT NOT NULL,
+            toc_html TEXT NOT NULL DEFAULT '',
+            source TEXT NOT NULL DEFAULT ''
         );
         CREATE INDEX IF NOT EXISTS idx_notes_sort ON notes(sort_ms DESC);
         CREATE TABLE IF NOT EXISTS projects (
@@ -57,12 +59,28 @@ def _init_schema(conn: sqlite3.Connection) -> None:
             summary TEXT NOT NULL,
             body_md TEXT NOT NULL,
             html TEXT NOT NULL,
+            toc_html TEXT NOT NULL DEFAULT '',
             repo_url TEXT NOT NULL DEFAULT '',
-            demo_url TEXT NOT NULL DEFAULT ''
+            demo_url TEXT NOT NULL DEFAULT '',
+            source TEXT NOT NULL DEFAULT ''
         );
         CREATE INDEX IF NOT EXISTS idx_projects_sort ON projects(sort_ms DESC);
         """
     )
+    conn.commit()
+    _migrate_schema(conn)
+
+
+def _migrate_schema(conn: sqlite3.Connection) -> None:
+    """Add new columns that may not exist in older databases."""
+    for col, col_type in [("toc_html", "TEXT"), ("source", "TEXT")]:
+        for table in ("notes", "projects"):
+            try:
+                conn.execute(
+                    f"ALTER TABLE {table} ADD COLUMN {col} {col_type} NOT NULL DEFAULT ''"
+                )
+            except sqlite3.OperationalError:
+                pass  # column already exists
     conn.commit()
 
 
@@ -100,12 +118,14 @@ def save_note(
     summary: str,
     body_md: str,
     html: str,
+    toc_html: str = "",
+    source: str = "",
 ) -> None:
     ms = _date_to_ms(date_iso)
     conn.execute(
         """
-        INSERT INTO notes (slug, title, date_iso, sort_ms, tags_json, summary, body_md, html)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO notes (slug, title, date_iso, sort_ms, tags_json, summary, body_md, html, toc_html, source)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(slug) DO UPDATE SET
             title=excluded.title,
             date_iso=excluded.date_iso,
@@ -113,7 +133,9 @@ def save_note(
             tags_json=excluded.tags_json,
             summary=excluded.summary,
             body_md=excluded.body_md,
-            html=excluded.html
+            html=excluded.html,
+            toc_html=excluded.toc_html,
+            source=excluded.source
         """,
         (
             slug,
@@ -124,6 +146,8 @@ def save_note(
             summary or "",
             body_md,
             html,
+            toc_html or "",
+            source or "",
         ),
     )
 
@@ -138,14 +162,16 @@ def save_project(
     summary: str,
     body_md: str,
     html: str,
+    toc_html: str = "",
     repo_url: str = "",
     demo_url: str = "",
+    source: str = "",
 ) -> None:
     ms = _date_to_ms(date_iso)
     conn.execute(
         """
-        INSERT INTO projects (slug, title, date_iso, sort_ms, tags_json, summary, body_md, html, repo_url, demo_url)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO projects (slug, title, date_iso, sort_ms, tags_json, summary, body_md, html, toc_html, repo_url, demo_url, source)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(slug) DO UPDATE SET
             title=excluded.title,
             date_iso=excluded.date_iso,
@@ -154,8 +180,10 @@ def save_project(
             summary=excluded.summary,
             body_md=excluded.body_md,
             html=excluded.html,
+            toc_html=excluded.toc_html,
             repo_url=excluded.repo_url,
-            demo_url=excluded.demo_url
+            demo_url=excluded.demo_url,
+            source=excluded.source
         """,
         (
             slug,
@@ -166,8 +194,10 @@ def save_project(
             summary or "",
             body_md,
             html,
+            toc_html or "",
             repo_url or "",
             demo_url or "",
+            source or "",
         ),
     )
 

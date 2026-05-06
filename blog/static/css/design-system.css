@@ -1,0 +1,248 @@
+/* ═══════════════════════════════════════════════════════════
+   Design System — 科技暗色风 (Tech Dark)
+   暗色默认，蓝紫渐变，玻璃拟态，发光效果
+   ═══════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
+
+/* ── 暗色主题（默认） ──────────────────────────────── */
+:root {
+  --bg-deep: #0a0a0f;
+  --bg-primary: #12121a;
+  --bg-secondary: #161622;
+  --bg-card: rgba(26, 26, 46, 0.6);
+
+  --text-primary: #e8eaed;
+  --text-secondary: #9ca0b0;
+  --text-tertiary: #6b7084;
+
+  --accent: #6366f1;
+  --accent-secondary: #8b5cf6;
+  --accent-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
+  --accent-soft: rgba(99, 102, 241, 0.12);
+
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+
+  --border: rgba(232, 234, 237, 0.06);
+  --border-hover: rgba(99, 102, 241, 0.3);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+  --glow: 0 0 20px rgba(99, 102, 241, 0.12);
+  --glow-hover: 0 0 30px rgba(99, 102, 241, 0.25);
+
+  --glass-bg: rgba(26, 26, 46, 0.5);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --font-sans: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+
+  --transition: 200ms ease;
+  --max-width: 960px;
+
+  /* Legacy aliases */
+  --card: var(--bg-card);
+  --text: var(--text-primary);
+  --muted: var(--text-secondary);
+  --radius: var(--radius-lg);
+  --shadow: var(--glass-shadow);
+}
+
+/* ── 浅色主题 ──────────────────────────────────────── */
+[data-theme="light"] {
+  --bg-deep: #f8f9fc;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f0f2f8;
+  --bg-card: rgba(255, 255, 255, 0.85);
+
+  --text-primary: #1a1d2e;
+  --text-secondary: #5a6378;
+  --text-tertiary: #8e95a8;
+
+  --accent: #4f6ef7;
+  --accent-secondary: #6c8cff;
+  --accent-gradient: linear-gradient(135deg, #4f6ef7, #6c8cff);
+  --accent-soft: rgba(79, 110, 247, 0.08);
+
+  --border: rgba(26, 29, 46, 0.08);
+  --border-hover: rgba(79, 110, 247, 0.3);
+
+  --shadow-sm: 0 1px 3px rgba(26, 29, 46, 0.06);
+  --shadow-md: 0 4px 12px rgba(26, 29, 46, 0.08);
+  --shadow-lg: 0 12px 30px rgba(26, 29, 46, 0.1);
+
+  --glow: 0 0 20px rgba(99, 102, 241, 0.08);
+  --glow-hover: 0 0 25px rgba(99, 102, 241, 0.15);
+
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+
+  --card: var(--bg-card);
+  --text: var(--text-primary);
+  --muted: var(--text-secondary);
+  --radius: var(--radius-lg);
+  --shadow: var(--glass-shadow);
+}
+
+/* ── 全局重置 ──────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+/* ── 全局过渡动画 ──────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  *, *::before, *::after {
+    transition: background-color var(--transition),
+                color var(--transition),
+                border-color var(--transition),
+                box-shadow var(--transition);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ── 玻璃拟态工具类 ────────────────────────────────── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* ── 渐变文字 ──────────────────────────────────────── */
+.gradient-text {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ── 按钮基础 ──────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.3rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.btn:hover {
+  transform: translateY(-1px);
+}
+.btn-primary {
+  background: var(--accent-gradient);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.btn-primary:hover {
+  box-shadow: var(--shadow-md), var(--glow);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── 代码高亮配色 ──────────────────────────────────── */
+pre, code {
+  font-family: var(--font-mono);
+}
+
+.article .body pre {
+  background: #0d1117;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.article .body code {
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.875em;
+}
+
+.article .body pre code {
+  background: none;
+  color: #e2e8f0;
+  padding: 0;
+}
+
+/* 代码语法高亮 */
+.article .body .codehilite .k,
+.article .body .codehilite .kc,
+.article .body .codehilite .kd,
+.article .body .codehilite .kn,
+.article .body .codehilite .kp,
+.article .body .codehilite .kr,
+.article .body .codehilite .kt { color: #c084fc; } /* keywords */
+.article .body .codehilite .s,
+.article .body .codehilite .sa,
+.article .body .codehilite .sc,
+.article .body .codehilite .s2,
+.article .body .codehilite .se,
+.article .body .codehilite .sh,
+.article .body .codehilite .si,
+.article .body .codehilite .s1 { color: #86efac; } /* strings */
+.article .body .codehilite .m,
+.article .body .codehilite .mi,
+.article .body .codehilite .mf { color: #fde68a; } /* numbers */
+.article .body .codehilite .c,
+.article .body .codehilite .cm,
+.article .body .codehilite .c1 { color: #6b7280; font-style: italic; } /* comments */
+.article .body .codehilite .nf { color: #93c5fd; } /* functions */
+.article .body .codehilite .nc { color: #f9a8d4; } /* classes */
+.article .body .codehilite .nd,
+.article .body .codehilite .nb { color: #67e8f9; } /* decorators/builtins */

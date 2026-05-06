@@ -1,0 +1,131 @@
+/* ═══════════════════════════════════════════════════
+   时间线布局
+   ═══════════════════════════════════════════════════ */
+
+.timeline {
+  position: relative;
+  padding-left: 120px;
+  margin: 2rem 0;
+}
+
+/* 垂直连接线 */
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 72px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--accent), var(--accent-secondary), transparent 80%);
+  opacity: 0.4;
+}
+
+/* 年分隔 */
+.timeline-separator {
+  position: relative;
+  margin: 2.5rem 0 1.5rem;
+  left: -120px;
+  padding-left: 120px;
+}
+
+.timeline-year {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.02em;
+}
+
+.timeline-month {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* 单条时间线条目 */
+.timeline-item {
+  position: relative;
+  margin-bottom: 1.75rem;
+  display: flex;
+  align-items: flex-start;
+}
+
+/* 圆点标记 */
+.timeline-marker {
+  position: absolute;
+  left: -54px;
+  top: 1.8rem;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  border: 3px solid var(--bg-primary);
+  box-shadow: 0 0 0 2px var(--accent), 0 0 12px rgba(99, 102, 241, 0.3);
+  z-index: 1;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.timeline-item:hover .timeline-marker {
+  transform: scale(1.4);
+  box-shadow: 0 0 0 2px var(--accent), 0 0 20px rgba(99, 102, 241, 0.5);
+}
+
+/* 日期标签 */
+.timeline-date {
+  position: absolute;
+  left: -116px;
+  top: 1.7rem;
+  width: 60px;
+  text-align: right;
+  font-size: 0.78rem;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+/* 卡片 */
+.timeline-card {
+  flex: 1;
+  min-width: 0;
+}
+
+.timeline-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--glass-shadow), var(--glow);
+}
+
+/* ── 移动端 ──────────────────────────────────── */
+@media (max-width: 640px) {
+  .timeline {
+    padding-left: 40px;
+  }
+  .timeline::before {
+    left: 18px;
+  }
+  .timeline-separator {
+    left: -40px;
+    padding-left: 40px;
+  }
+  .timeline-marker {
+    left: -28px;
+    top: 1.2rem;
+    width: 10px;
+    height: 10px;
+  }
+  .timeline-date {
+    position: static;
+    width: auto;
+    text-align: left;
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+  }
+  .timeline-item {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .timeline-card {
+    width: 100%;
+  }
+}

@@ -12,6 +12,8 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body>
+<div id="reading-progress"></div>
+
 <header class="site-header">
     <div class="site-header-inner">
         <div class="brand"><a href="{{ url_for('content.blog_home') }}">学习笔记 · 小项目</a></div>
@@ -22,8 +24,8 @@
             <a href="{{ url_for('content.ai_search_page') }}">AI 搜索</a>
             <a href="{{ url_for('content.wisdom_page') }}">智慧箴言</a>
             <button id="themeToggle" class="theme-toggle" aria-label="切换主题" title="切换深色/浅色模式">
-                <span class="icon-light">🌙</span>
-                <span class="icon-dark">☀️</span>
+                <span class="icon-light">☀️</span>
+                <span class="icon-dark">🌙</span>
             </button>
         </nav>
     </div>
@@ -31,5 +33,21 @@
 <main>
     {% block content %}{% endblock %}
 </main>
+
+<footer class="site-footer">
+    <div class="footer-links">
+        <a href="{{ url_for('content.blog_home') }}">首页</a>
+        <a href="{{ url_for('content.notes_list') }}">笔记</a>
+        <a href="{{ url_for('content.projects_list') }}">项目</a>
+        <a href="{{ url_for('content.ai_search_page') }}">AI 搜索</a>
+        <a href="{{ url_for('content.wisdom_page') }}">智慧箴言</a>
+    </div>
+    <div>&copy; {{ now.year }} {{ author_name }} · 由 Flask + SQLite 驱动</div>
+</footer>
+
+<button id="backToTop" class="back-to-top" aria-label="回到顶部">↑</button>
+
+<script src="{{ url_for('static', filename='js/progress.js') }}"></script>
+<script src="{{ url_for('static', filename='js/back-to-top.js') }}"></script>
 </body>
 </html>

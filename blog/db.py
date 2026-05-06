@@ -20,4 +20,16 @@ def bootstrap_db():
     global _db
     _db = sqlite_store.get_client()
     n_notes, n_projects = content_sync.sync_all(_db)
-    logger.info("已同步 %s 篇笔记、%s 个项目到 SQLite", n_notes, n_projects)
+
+    from blog import github_sync
+    n_github = 0
+    if github_sync.GITHUB_ENABLED:
+        try:
+            n_github = github_sync.sync_github(_db)
+        except Exception as e:
+            logger.warning("GitHub 同步失败: %s", e)
+
+    logger.info(
+        "已同步 %s 篇本地笔记、%s 个本地项目、%s 篇 GitHub 笔记",
+        n_notes, n_projects, n_github,
+    )

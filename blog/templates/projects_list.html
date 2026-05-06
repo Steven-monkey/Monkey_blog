@@ -1,15 +1,18 @@
 {% extends "base.html" %}
 {% block title %}项目列表 · 个人博客{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/timeline.css') }}">
+{% endblock %}
 {% block content %}
-{% from "macros/cards.html" import card_grid %}
+{% from "macros/timeline.html" import timeline %}
 
 <section class="hero">
-    <h1>项目</h1>
+    <h1 class="gradient-text">项目</h1>
     <p>自己动手做的小实验和工具。</p>
 </section>
 
 {% if items %}
-{{ card_grid(items, item_type="project") }}
+{{ timeline(items, item_type="project") }}
 {% else %}
 <p class="empty">暂无项目，请在 <code>content/projects/</code> 添加 Markdown。</p>
 {% endif %}

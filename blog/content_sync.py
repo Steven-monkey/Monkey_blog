@@ -20,7 +20,7 @@ CONTENT_DIR = ROOT_DIR / "content"
 NOTES_DIR = CONTENT_DIR / "notes"
 PROJECTS_DIR = CONTENT_DIR / "projects"
 
-MD_EXTENSIONS = ["extra", "toc", "sane_lists"]
+MD_EXTENSIONS = ["extra", "toc", "sane_lists", "codehilite"]
 
 
 def _default_summary_from_md(text: str, max_len: int = 160) -> str:
@@ -34,8 +34,11 @@ def _default_summary_from_md(text: str, max_len: int = 160) -> str:
     return plain[: max_len - 1].rstrip() + "…"
 
 
-def _render_html(md_body: str) -> str:
-    return markdown.markdown(md_body, extensions=MD_EXTENSIONS)
+def _render_html(md_body: str) -> tuple[str, str]:
+    md = markdown.Markdown(extensions=MD_EXTENSIONS)
+    body_html = md.convert(md_body)
+    toc_html = getattr(md, 'toc', '') or ''
+    return body_html, toc_html if toc_html.strip() else ''
 
 
 def _parse_tags(meta: dict) -> list[str]:
@@ -114,7 +117,7 @@ def sync_all(conn: sqlite3.Connection) -> tuple[int, int]:
         title = str(meta.get("title") or slug).strip()
         date_iso = _date_from_meta(meta, path)
         tags, summary = _maybe_enrich_with_ai(title, body, meta)
-        html = _render_html(body)
+        html, toc_html = _render_html(body)
         store.save_note(
             conn,
             slug=slug,
@@ -124,6 +127,7 @@ def sync_all(conn: sqlite3.Connection) -> tuple[int, int]:
             summary=summary,
             body_md=body,
             html=html,
+            toc_html=toc_html,
         )
 
     for path, meta, body in _load_md_dir(PROJECTS_DIR):
@@ -132,7 +136,7 @@ def sync_all(conn: sqlite3.Connection) -> tuple[int, int]:
         title = str(meta.get("title") or slug).strip()
         date_iso = _date_from_meta(meta, path)
         tags, summary = _maybe_enrich_with_ai(title, body, meta)
-        html = _render_html(body)
+        html, toc_html = _render_html(body)
         repo_url = str(meta.get("repo") or meta.get("repo_url") or "").strip()
         demo_url = str(meta.get("demo") or meta.get("demo_url") or "").strip()
         store.save_project(
@@ -144,6 +148,7 @@ def sync_all(conn: sqlite3.Connection) -> tuple[int, int]:
             summary=summary,
             body_md=body,
             html=html,
+            toc_html=toc_html,
             repo_url=repo_url,
             demo_url=demo_url,
         )

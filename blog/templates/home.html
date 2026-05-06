@@ -4,7 +4,6 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
 {% endblock %}
 {% block content %}
-{% from "macros/cards.html" import card_grid %}
 
 <!-- Hero -->
 <section class="hero-section">
@@ -49,7 +48,20 @@
     <a href="{{ url_for('content.notes_list') }}" class="section-link">查看全部 →</a>
 </div>
 {% if notes %}
-{{ card_grid(notes[:6], item_type="note") }}
+<div class="card-grid">
+    {% for n in notes[:6] %}
+    <article class="card">
+        <h2><a href="{{ url_for('content.note_detail', slug=n.slug) }}">{{ n.title }}</a></h2>
+        <div class="card-meta">{{ n.date }}</div>
+        <p>{{ n.summary }}</p>
+        {% if n.tags %}
+        <div class="tags">
+            {% for t in n.tags %}<span class="tag">{{ t }}</span>{% endfor %}
+        </div>
+        {% endif %}
+    </article>
+    {% endfor %}
+</div>
 {% else %}
 <p class="empty">暂无笔记，请在 <code>content/notes/</code> 添加 Markdown 后重启服务。</p>
 {% endif %}
@@ -60,10 +72,24 @@
     <a href="{{ url_for('content.projects_list') }}" class="section-link">查看全部 →</a>
 </div>
 {% if projects %}
-{{ card_grid(projects[:4], item_type="project") }}
+<div class="card-grid">
+    {% for p in projects[:4] %}
+    <article class="card">
+        <h2><a href="{{ url_for('content.project_detail', slug=p.slug) }}">{{ p.title }}</a></h2>
+        <div class="card-meta">{{ p.date }}</div>
+        <p>{{ p.summary }}</p>
+        {% if p.repo_url or p.demo_url %}
+        <div class="links-row">
+            {% if p.repo_url %}<a class="btn-outline" href="{{ p.repo_url }}" target="_blank" rel="noopener">仓库</a>{% endif %}
+            {% if p.demo_url %}<a class="btn-outline" href="{{ p.demo_url }}" target="_blank" rel="noopener">演示</a>{% endif %}
+        </div>
+        {% endif %}
+    </article>
+    {% endfor %}
+</div>
 {% else %}
 <p class="empty">暂无项目，请在 <code>content/projects/</code> 添加 Markdown。</p>
 {% endif %}
 
-<p class="footer-note">部署：<code>docker compose up --build</code> · SQLite：<span style="color: {% if db_ok %}#22c55e{% else %}#ef4444{% endif %}">{{ "可用" if db_ok else "不可用" }}</span></p>
+<p class="footer-note">部署：<code>docker compose up --build</code> · SQLite：<span style="color: var(--success)">{{ "可用" if db_ok else "不可用" }}</span></p>
 {% endblock %}

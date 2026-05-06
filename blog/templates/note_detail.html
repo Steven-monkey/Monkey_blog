@@ -2,9 +2,17 @@
 {% block title %}{{ doc.title }} · 笔记{% endblock %}
 {% block extra_head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/chat-widget.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/toc.css') }}">
 {% endblock %}
 {% block content %}
 {% from "macros/article.html" import article_header, article_body, back_link %}
+
+{% if doc.toc_html %}
+<button id="tocToggle" class="toc-toggle" onclick="document.getElementById('tocNav').classList.toggle('open')" aria-label="目录">📑</button>
+<nav id="tocNav" class="toc-nav">
+  <div class="toc-content">{{ doc.toc_html | safe }}</div>
+</nav>
+{% endif %}
 
 <article class="article">
     {{ article_header(doc, show_tags=True) }}

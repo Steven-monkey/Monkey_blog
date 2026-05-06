@@ -1,0 +1,125 @@
+"""从 GitHub 仓库同步 Markdown 笔记到 SQLite。"""
+
+from __future__ import annotations
+
+import base64
+import logging
+import os
+import sqlite3
+from pathlib import Path
+
+import frontmatter
+import requests
+
+from blog import sqlite_store as store
+from blog.content_sync import MD_EXTENSIONS, _default_summary_from_md, _parse_tags, _render_html
+
+logger = logging.getLogger(__name__)
+
+GITHUB_REPO = os.getenv("GITHUB_REPO", "").strip()
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "").strip()
+GITHUB_PATH = os.getenv("GITHUB_PATH", "content/notes").strip("/")
+GITHUB_BRANCH = os.getenv("GITHUB_BRANCH", "main").strip()
+SOURCE_TAG = "github"
+
+GITHUB_ENABLED = bool(GITHUB_REPO)
+
+_API_BASE = "https://api.github.com"
+
+
+def _headers() -> dict[str, str]:
+    h = {"Accept": "application/vnd.github.v3+json", "User-Agent": "blog-sync/1.0"}
+    if GITHUB_TOKEN:
+        h["Authorization"] = f"Bearer {GITHUB_TOKEN}"
+    return h
+
+
+def _date_from_meta_or_fallback(meta: dict, default_date: str) -> str:
+    from datetime import date, datetime, timezone
+    d = meta.get("date")
+    if d is None:
+        return default_date
+    if isinstance(d, datetime):
+        return d.date().isoformat()
+    if isinstance(d, date):
+        return d.isoformat()
+    s = str(d).strip()
+    return s[:10] if len(s) >= 10 else s
+
+
+def _fetch_md_files() -> list[dict]:
+    """从配置的 GitHub 仓库拉取 .md 文件列表及内容。"""
+    if not GITHUB_ENABLED:
+        return []
+
+    url = f"{_API_BASE}/repos/{GITHUB_REPO}/git/trees/{GITHUB_BRANCH}?recursive=1"
+    resp = requests.get(url, headers=_headers(), timeout=30)
+    resp.raise_for_status()
+
+    tree = resp.json().get("tree") or []
+    prefix = GITHUB_PATH + "/"
+    md_entries = [
+        item for item in tree
+        if item.get("type") == "blob"
+        and item["path"].startswith(prefix)
+        and item["path"].endswith(".md")
+    ]
+
+    results = []
+    for entry in md_entries:
+        file_url = f"{_API_BASE}/repos/{GITHUB_REPO}/contents/{entry['path']}?ref={GITHUB_BRANCH}"
+        file_resp = requests.get(file_url, headers=_headers(), timeout=30)
+        if file_resp.status_code != 200:
+            logger.warning("GitHub 读取失败 %s: HTTP %s", entry["path"], file_resp.status_code)
+            continue
+
+        data = file_resp.json()
+        content_b64 = data.get("content") or ""
+        if not content_b64:
+            continue
+
+        raw_text = base64.b64decode(content_b64).decode("utf-8")
+        post = frontmatter.loads(raw_text)
+        meta = dict(post.metadata)
+        body = (post.content or "").strip()
+
+        slug = str(meta.get("slug") or Path(entry["path"]).stem).strip()
+        title = str(meta.get("title") or slug).strip()
+        date_iso = _date_from_meta_or_fallback(meta, "2026-01-01")
+        tags = _parse_tags(meta)
+        summary = str(meta.get("summary") or _default_summary_from_md(body)).strip()
+        html, toc_html = _render_html(body)
+
+        results.append({
+            "slug": slug,
+            "title": title,
+            "date_iso": date_iso,
+            "tags": tags,
+            "summary": summary,
+            "body_md": body,
+            "html": html,
+            "toc_html": toc_html,
+            "source": SOURCE_TAG,
+        })
+
+    return results
+
+
+def sync_github(conn: sqlite3.Connection) -> int:
+    """从 GitHub 拉取 Markdown 并写入 SQLite。返回同步条数。"""
+    files = _fetch_md_files()
+    for f in files:
+        store.save_note(
+            conn,
+            slug=f["slug"],
+            title=f["title"],
+            date_iso=f["date_iso"],
+            tags=f["tags"],
+            summary=f["summary"],
+            body_md=f["body_md"],
+            html=f["html"],
+            toc_html=f.get("toc_html", ""),
+            source=f.get("source", SOURCE_TAG),
+        )
+    conn.commit()
+    return len(files)

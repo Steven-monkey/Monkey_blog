@@ -5,6 +5,20 @@
 .hero-section {
   padding: 3rem 0 2.5rem;
   text-align: center;
+  position: relative;
+}
+
+/* 背景光晕装饰 */
+.hero-section::before {
+  content: "";
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.08), transparent 70%);
+  pointer-events: none;
 }
 
 .hero-avatar {
@@ -20,13 +34,13 @@
   align-items: center;
   justify-content: center;
   font-size: 2.2rem;
-  box-shadow: 0 8px 24px rgba(79, 110, 247, 0.25);
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
 }
 
 .hero-title {
   margin: 0 0 0.5rem;
   font-size: clamp(1.75rem, 5vw, 2.5rem);
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: -0.03em;
   color: var(--text-primary);
 }
@@ -60,22 +74,37 @@
   flex-wrap: wrap;
 }
 
-/* ── 关于区域 ──────────────────────────── */
+/* ── 关于区域 ──────────────────────────────────── */
 .about-section {
   margin: 3rem 0 2rem;
 }
 
 .about-card {
-  background: var(--card-bg);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  padding: 1.5rem;
+  box-shadow: var(--glass-shadow);
+  padding: 1.5rem 2rem;
   display: flex;
   gap: 2rem;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.about-card::before {
+  content: "";
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.06), transparent 70%);
+  pointer-events: none;
 }
 
 .about-text {
@@ -88,7 +117,7 @@
 
 .about-stats {
   display: flex;
-  gap: 2rem;
+  gap: 2.5rem;
 }
 
 .stat {
@@ -98,8 +127,11 @@
 .stat-number {
   display: block;
   font-size: 2rem;
-  font-weight: 700;
-  color: var(--accent);
+  font-weight: 800;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   line-height: 1;
 }
 
@@ -107,7 +139,7 @@
   display: block;
   font-size: 0.82rem;
   color: var(--text-tertiary);
-  margin-top: 0.35rem;
+  margin-top: 0.4rem;
 }
 
 @media (max-width: 640px) {
@@ -117,6 +149,7 @@
   .about-card {
     flex-direction: column;
     align-items: flex-start;
+    padding: 1.25rem;
   }
   .about-stats {
     width: 100%;
