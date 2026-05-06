@@ -1,2 +1,7 @@
 data/*.db
 .env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo

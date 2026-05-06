@@ -5,291 +5,111 @@
 ### 现有基础设施
 | 组件 | 技术栈 | 说明 |
 |------|--------|------|
-| Web 框架 | Flask | Python，模板渲染 |
+| Web 框架 | Flask | Blueprint 模块化路由 |
 | 存储层 | SQLite + Markdown | 启动时从 Markdown 同步到 SQLite |
-| 容器化 | Docker + Docker Compose | 单 web 服务 + 数据卷 |
-| AI 引擎 | OpenAI 兼容 API | 已有 LLM 接入（DeepSeek），用于智慧箴言 |
-| 前端 | Jinja2 模板 + CSS | 无前后端分离，纯服务端渲染 |
+| 容器化 | Docker + Docker Compose | web 服务 + 数据卷 |
+| AI 引擎 | OpenAI 兼容 API | LLM（DeepSeek）+ 生图（doubao-seedream） |
+| 前端 | Jinja2 模板 + CSS/JS | 服务端渲染，深色模式支持 |
 
 ### 现有页面
-- 首页（笔记 + 项目概览）
-- 笔记列表 / 详情
+- 首页（Hero + 关于 + 笔记/项目概览）
+- 笔记列表 / 详情（含 AI 推荐 + 阅读助手聊天）
 - 项目列表 / 详情
-- 智慧箴言（AI 生成）
+- 智慧箴言（AI 生成 + 图片 + 海报下载）
+- AI 智能搜索
 
-### 已存在的 AI 能力
-- LLM API 调用封装（重试、回退、超时）
-- OpenAI 兼容图片生成
-- 箴言生成（system prompt + JSON mode）
+### 已实现的 AI 能力
+- AI 智能搜索（关键词提取 + 本地匹配 + AI 解读）
+- AI 阅读助手（SSE 流式聊天，基于文章内容）
+- AI 内容推荐（标签匹配 + AI 推荐理由）
+- AI 自动标签和摘要生成
+- AI 箴言 + 生图（9:16 竖屏背景图）
+- 海报 Canvas 合成下载
+
+### 代码架构
+
+```
+blog/
+├── main.py              # app factory (30行)
+├── config.py            # 环境变量 & 常量集中管理
+├── db.py                # 数据库启动
+├── content_sync.py      # Markdown → SQLite 同步
+├── sqlite_store.py      # 数据访问层
+├── ai_service.py        # AI 服务层 (搜索/聊天/推荐/标签)
+├── wisdom_service.py    # 箴言 & 生图服务
+├── routes_content.py    # SSR 页面路由
+├── routes_ai.py         # AI API 路由
+├── routes_wisdom.py     # 箴言 API 路由
+├── routes_system.py     # 健康检查路由
+├── static/
+│   ├── css/             # 8个CSS文件 (base/layout/components/utilities/home/chat-widget/ai-search/wisdom)
+│   └── js/              # 4个JS文件 (theme/chat-widget/ai-search/wisdom)
+└── templates/
+    ├── macros/          # Jinja2 宏 (cards/tags/article)
+    └── components/      # 可复用组件 (chat_widget/recommend_section)
+```
 
 ---
 
 ## 二、AI 博客功能设计
 
 ### 核心功能矩阵
+| 功能 | 技术 | 价值 |
+|------|------|------|
+| AI 智能搜索 | LLM + SQLite | 自然语言搜索学习笔记 |
+| AI 阅读助手 | LLM + SSE | 边读边问，理解内容 |
+| AI 内容推荐 | LLM + 标签 | 发现关联知识 |
+| AI 自动标签 | LLM | 无需手动打标签 |
+| AI 摘要 | LLM | 快速了解文章要点 |
+| 智慧箴言 | LLM + 生图 | AI 哲理短句 + 配图 |
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    AI 博客功能架构                         │
-├─────────────┬───────────────┬───────────────────────────┤
-│  功能模块    │   技术实现      │    用户价值                 │
-├─────────────┼───────────────┼───────────────────────────┤
-│ AI 智能搜索  │ LLM + SQLite  │ 自然语言搜索学习笔记        │
-│ AI 阅读助手  │ LLM + SSE     │ 边读边问，理解内容          │
-│ AI 内容推荐  │ LLM + 标签    │ 发现关联知识                │
-│ AI 自动标签  │ LLM + 定时    │ 无需手动打标签              │
-│ AI 摘要      │ LLM + 缓存    │ 快速了解文章要点            │
-└─────────────┴───────────────┴───────────────────────────┘
-```
+### API 一览
 
-### 1. AI 智能搜索 (`/ai/search`)
-- **输入**: 自然语言查询（如"讲一下 Docker 部署"）
-- **流程**: 
-  1. 先用 LLM 将用户查询转化为关键词列表
-  2. 在 SQLite 中搜索匹配的笔记/项目（按标题、标签、摘要）
-  3. LLM 对搜索结果进行重排序和智能摘要
-- **输出**: 带 AI 解读的搜索结果页面
-- **API**: `POST /api/ai/search`
-
-### 2. AI 阅读助手 (`/ai/chat`)
-- **输入**: 当前文章内容 + 用户问题
-- **流程**:
-  1. 用户阅读笔记/项目时，可点击"AI 助手"按钮
-  2. 侧边栏弹出对话窗口
-  3. 将文章正文 + 用户问题发送给 LLM
-  4. LLM 基于文章内容回答问题
-- **API**: `POST /api/ai/chat` (streaming via SSE)
-- **技术**: Server-Sent Events 实现流式输出
-
-### 3. AI 内容推荐 (`/api/ai/recommend`)
-- **输入**: 当前文章 slug + 类型 (note/project)
-- **流程**:
-  1. 获取当前文章的标签、标题、摘要
-  2. 从 SQLite 中找出标签匹配的其他文章
-  3. LLM 排序并生成推荐理由
-- **输出**: JSON 推荐列表（含 AI 推荐语）
-- **显示**: 在文章详情页底部 "你可能也喜欢"
-
-### 4. AI 自动标签 & 摘要
-- **触发**: 内容同步时（`content_sync.py`）
-- **流程**:
-  1. 如果文章 front matter 没有 tags，调用 LLM 生成
-  2. 如果 summary 为空，使用 LLM 生成更智能的摘要（而不是简单截取）
-- **缓存**: 标签/摘要写入 SQLite 行内字段；当前实现同步阶段按需调用 LLM（未单独建缓存表）
+| 方法 | URL | 说明 |
+|------|-----|------|
+| POST | `/api/ai/search` | AI 智能搜索 |
+| POST | `/api/ai/chat` | AI 阅读助手 SSE 流式 |
+| POST | `/api/ai/recommend` | AI 内容推荐 |
+| GET | `/api/ai/status` | AI 服务状态 |
+| GET | `/api/llm/wisdom` | AI 生成箴言 |
+| GET | `/api/llm/status` | LLM/生图配置状态 |
+| GET | `/api/wisdom/background` | 背景图 URL |
+| GET | `/api/wisdom/render-image` | 渲染生图 |
+| GET | `/api/wisdom/download-image` | 下载背景图 |
+| GET | `/api/wisdom/image-proxy` | 图片代理 |
+| GET | `/healthz` | 健康检查 |
 
 ---
 
-## 三、技术架构
+## 三、部署
 
-```
-┌─────────────────────────────────────────────────────┐
-│                    用户浏览器                          │
-│  ┌──────────┐  ┌───────────┐  ┌────────────────┐    │
-│  │ 笔记/项目  │  │ AI 搜索页  │  │ AI 阅读助手     │    │
-│  │ 普通页面   │  │           │  │ (侧边栏Chat)    │    │
-│  └─────┬────┘  └─────┬─────┘  └───────┬────────┘    │
-│        │              │                │              │
-└────────┼──────────────┼────────────────┼──────────────┘
-         │              │                │
-         ▼              ▼                ▼
-┌─────────────────────────────────────────────────────┐
-│                  Flask  Web 服务                       │
-│  ┌──────────┐  ┌───────────┐  ┌────────────────┐    │
-│  │ 常规路由   │  │ AI 搜索路由 │  │ AI 聊天路由    │    │
-│  │ /notes/*  │  │ /ai/search │  │ /api/ai/chat  │    │
-│  │ /projects*│  │            │  │ (SSE流式)      │    │
-│  └──────────┘  └─────┬─────┘  └───────┬────────┘    │
-│                       │                │              │
-│              ┌────────┴────────────────┴───┐          │
-│              │     AI 服务层 (ai_service.py)  │          │
-│              │  - 搜索                      │          │
-│              │  - 聊天                      │          │
-│              │  - 推荐                      │          │
-│              │  - 标签/摘要生成              │          │
-│              └────────┬────────────────────┘          │
-│                       │                                │
-│              ┌────────┴───────┐                        │
-│              │  LLM API 客户端 │                        │
-│              │  (已有封装)     │                        │
-│              └────────────────┘                        │
-└─────────────────────┬───────────────────────────────────┘
-                      │
-┌─────────────────────┴───────────────────────────────────┐
-│                    SQLite                               │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
-│  │ notes/projects │  │ 标签/摘要等   │  │ 应用内关键词   │  │
-│  │ 表存储正文 HTML │  │ 存于行内字段  │  │ 扫描匹配      │  │
-│  └──────────────┘  └──────────────┘  └──────────────┘  │
-└─────────────────────────────────────────────────────────┘
-```
-
----
-
-## 四、文件变更清单
-
-### 新增文件
-| 文件 | 用途 |
-|------|------|
-| `ai_service.py` | AI 核心服务层（搜索、聊天、推荐、标签） |
-| `templates/ai_search.html` | AI 智能搜索页面 |
-| `templates/ai_chat.html` | AI 阅读助手侧边栏组件 |
-| `content/notes/ai-intro.md` | 示例：AI 博客介绍笔记 |
-
-### 修改文件
-| 文件 | 变更内容 |
-|------|---------|
-| `main.py` | 新增 AI 路由和初始化 |
-| `content_sync.py` | 同步时自动生成标签/摘要 |
-| `sqlite_store.py` | 笔记/项目表与查询 |
-| `templates/base.html` | 新增导航链接 + AI 助手入口 |
-| `templates/note_detail.html` | 集成 AI 推荐、阅读助手 |
-| `templates/project_detail.html` | 集成 AI 推荐、阅读助手 |
-| `templates/home.html` | 新增 AI 搜索入口 |
-| `static/site.css` | AI 相关样式 |
-| `Dockerfile` | 复制新文件 |
-| `requirements.txt` | 无变化（已有依赖足够） |
-
----
-
-## 五、API 设计
-
-### 1. AI 搜索
-```
-POST /api/ai/search
-请求: { "q": "用户查询" }
-响应: {
-  "query": "原始查询",
-  "results": [
-    {
-      "type": "note|project",
-      "slug": "...",
-      "title": "...",
-      "summary": "...",
-      "tags": [...],
-      "ai_explanation": "AI 解释为什么这个结果相关",
-      "relevance_score": 0.95
-    }
-  ],
-  "ai_summary": "AI 对搜索结果的总体解读"
-}
-```
-
-### 2. AI 聊天（流式）
-```
-POST /api/ai/chat
-请求: {
-  "content_type": "note|project",
-  "slug": "文章标识",
-  "message": "用户问题"
-}
-响应: SSE 流式输出 text/event-stream
-事件格式:
-  data: {"type": "token", "content": "正在思考..."}
-  data: {"type": "done"}
-```
-
-### 3. AI 推荐
-```
-POST /api/ai/recommend
-请求: { "type": "note|project", "slug": "xxx", "limit": 3 }
-响应: {
-  "items": [
-    {
-      "type": "note|project",
-      "slug": "...",
-      "title": "...",
-      "summary": "...",
-      "ai_reason": "AI 推荐理由"
-    }
-  ]
-}
-```
-
-### 4. AI 标签生成
-```
-POST /api/ai/tags
-请求: { "title": "...", "body": "markdown 正文" }
-响应: { "tags": ["Python", "Docker", ...] }
-```
-
----
-
-## 六、提示词设计
-
-### 1. 搜索关键词提取 Prompt
-```
-你是一个博客搜索引擎，请将用户的自然语言查询转化为3-5个搜索关键词。
-只输出关键词列表，用逗号分隔。
-用户查询: {query}
-```
-
-### 2. 搜索结果解读 Prompt
-```
-你是博客的 AI 导读员，请对以下搜索结果用中文给出简洁的总体解读（50字内）。
-搜索结果: {results_summary}
-```
-
-### 3. 阅读助手 Prompt
-```
-你是这篇博客文章的 AI 阅读助手。请基于以下文章内容回答用户问题。
-如果问题超出文章范围，礼貌地说明并推荐相关内容。
-
-文章标题: {title}
-文章内容: {body}
-
-用户问题: {question}
-```
-
-### 4. 推荐理由 Prompt
-```
-请根据当前文章和推荐的文章内容，用一句话说明为什么推荐（20字内）。
-当前: {current_title}
-推荐: {recommended_title}
-推荐理由:
-```
-
-### 5. 自动标签 Prompt
-```
-请根据文章标题和内容，生成3-5个中文标签，用逗号分隔。
-仅输出标签，不要多余文字。
-标题: {title}
-内容: {body[:500]}
-```
-
----
-
-## 七、部署说明
-
-无需新增服务，现有 Docker Compose 配置即可运行。
-只需构建并启动：
+### 本地开发
 ```bash
 docker compose up --build
+# 访问 http://localhost
 ```
 
-环境变量（沿用已有）：
+### 生产部署（已有 Nginx 的服务器）
+```bash
+docker compose -f docker-compose.prod.yml up -d --build
+# 配合服务器 Nginx 反代到 127.0.0.1:8080
 ```
-LLM_API_URL=https://api.deepseek.com/chat/completions
-LLM_API_KEY=your_key_here
-LLM_MODEL=deepseek-chat
+
+环境变量（`.env`）：
+```
+LLM_API_URL=https://api.siliconflow.cn/v1
+LLM_API_KEY=your_key
+LLM_MODEL=deepseek-ai/DeepSeek-V4-Flash
+IMAGE_API_KEY=your_key
+IMAGE_API_BASE=https://ark.cn-beijing.volces.com/api/v3
+IMAGE_MODEL=doubao-seedream-4-5-251128
 ```
 
 ---
 
-## 八、实现优先级
+## 四、设计系统
 
-### 第一阶段（核心功能）
-1. ✅ `ai_service.py` — AI 服务层
-2. ✅ `main.py` — AI 路由
-3. ✅ AI 搜索页面 (`/ai/search`)
-4. ✅ AI 阅读助手（侧边栏）
-5. ✅ AI 内容推荐（文章底部）
-
-### 第二阶段（增强功能）
-1. `content_sync.py` — 自动标签/摘要生成
-2. AI 搜索结果缓存
-3. 流式输出优化
-
-### 第三阶段（体验优化）
-1. 更好看的 AI 对话 UI
-2. 搜索历史记录
-3. AI 文章摘要卡片
+- **配色**: 靛蓝 `#4f6ef7`，浅色/深色双主题
+- **字体**: Inter (UI) + Noto Sans SC (中文)
+- **主题切换**: `[data-theme="dark"]`，localStorage 持久化
+- **CSS 变量**: 所有颜色/阴影/圆角统一管理
