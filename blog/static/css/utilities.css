@@ -1,0 +1,14 @@
+/* ═══════════════════════════════════════════════════
+   Utilities: 空状态、页脚、辅助类
+   ═══════════════════════════════════════════════════ */
+
+.empty {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.footer-note {
+  margin-top: 3rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+}

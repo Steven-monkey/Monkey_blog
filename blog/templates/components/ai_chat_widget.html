@@ -1,0 +1,20 @@
+<!-- AI 阅读助手 -->
+<div class="ai-chat-widget">
+    <button class="ai-chat-btn" id="aiChatBtn" onclick="toggleChat()" title="AI 阅读助手">🤖</button>
+</div>
+<div class="ai-chat-panel" id="aiChatPanel">
+    <div class="ai-chat-header">
+        <span>🤖 Roo 阅读助手</span>
+        <button onclick="toggleChat()">✕</button>
+    </div>
+    <div class="ai-chat-messages" id="chatMessages"></div>
+    <div class="ai-chat-input-area">
+        <input type="text" id="chatInput" placeholder="问关于{{ placeholder_topic }}的问题..." onkeydown="if(event.key==='Enter') sendChat()">
+        <button id="chatSendBtn" onclick="sendChat()">发送</button>
+    </div>
+</div>
+<script>
+const CONTENT_TYPE = "{{ item_type }}";
+const CONTENT_SLUG = "{{ slug }}";
+</script>
+<script src="{{ url_for('static', filename='js/chat-widget.js') }}"></script>

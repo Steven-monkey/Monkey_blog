@@ -1,0 +1,7 @@
+{% macro tag_list(tags) %}
+{% if tags %}
+<div class="tags">
+  {% for t in tags %}<span class="tag">{{ t }}</span>{% endfor %}
+</div>
+{% endif %}
+{% endmacro %}

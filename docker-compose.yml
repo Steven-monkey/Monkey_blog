@@ -1,14 +1,23 @@
 services:
   web:
     build: .
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     env_file:
       - .env
     environment:
       SQLITE_PATH: /app/data/blog.db
     volumes:
       - sqlite-data:/app/data
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - web
 
 volumes:
   sqlite-data:

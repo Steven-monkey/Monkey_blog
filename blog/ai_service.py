@@ -3,25 +3,20 @@
 from __future__ import annotations
 
 import json
-import os
 import re
 import sqlite3
 from typing import Any, Generator
 
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
-
 from blog import sqlite_store as store
-
-# ── LLM 配置（复用 main.py 的环境变量） ──────────────────────────
-LLM_API_URL = (
-    os.getenv("LLM_API_URL")
-    or os.getenv("DEEPSEEK_API_URL")
-    or "https://api.deepseek.com/chat/completions"
+from blog.config import (
+    HTTP_SESSION,
+    LLM_API_KEY,
+    LLM_API_URL,
+    LLM_HTTP_TIMEOUT_SECONDS,
+    LLM_MODEL,
+    _normalize_api_url,
 )
-LLM_API_KEY = os.getenv("LLM_API_KEY") or os.getenv("DEEPSEEK_API_KEY") or ""
-LLM_MODEL = os.getenv("LLM_MODEL") or os.getenv("DEEPSEEK_MODEL") or "deepseek-chat"
-LLM_HTTP_TIMEOUT = int(os.getenv("LLM_HTTP_TIMEOUT_SECONDS", "45"))
+
 AI_ENABLED = bool(LLM_API_KEY)
 
 # ── AI 搜索结果缓存 ──────────────────────────────────────────
@@ -29,38 +24,6 @@ AI_SEARCH_CACHE_PREFIX = "blog:ai:search:"
 AI_TAGS_CACHE_PREFIX = "blog:ai:tags:"
 AI_SUMMARY_CACHE_PREFIX = "blog:ai:summary:"
 AI_CACHE_TTL = 86400  # 1 天
-
-
-def _build_session() -> Any:
-    retry = Retry(
-        total=3,
-        connect=3,
-        read=3,
-        backoff_factor=0.6,
-        status_forcelist=(429, 500, 502, 503, 504),
-        allowed_methods=frozenset(["GET", "POST"]),
-    )
-    adapter = HTTPAdapter(max_retries=retry)
-    session = __import__("requests").Session()
-    session.mount("http://", adapter)
-    session.mount("https://", adapter)
-    return session
-
-
-HTTP_SESSION = _build_session()
-
-
-def _normalize_api_url(raw_url: str) -> str:
-    url = (raw_url or "").strip().rstrip("/")
-    if not url:
-        return "https://api.deepseek.com/chat/completions"
-    if url.endswith("/chat/completions"):
-        return url
-    if url == "https://api.deepseek.com":
-        return f"{url}/chat/completions"
-    if url.endswith("/v1"):
-        return f"{url}/chat/completions"
-    return url
 
 
 def _llm_request(
@@ -94,7 +57,7 @@ def _llm_request(
             "Content-Type": "application/json",
             "Authorization": f"Bearer {LLM_API_KEY}",
         },
-        timeout=LLM_HTTP_TIMEOUT,
+        timeout=LLM_HTTP_TIMEOUT_SECONDS,
         stream=stream,
     )
     response.raise_for_status()

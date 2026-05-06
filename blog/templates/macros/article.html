@@ -1,0 +1,19 @@
+{% macro article_header(doc, show_tags=True) %}
+<header>
+  <h1>{{ doc.title }}</h1>
+  <div class="meta">
+    {{ doc.date }}
+    {% if show_tags and doc.tags %}
+     · {% for t in doc.tags %}<span class="tag" style="margin-left:0.25rem">{{ t }}</span>{% endfor %}
+    {% endif %}
+  </div>
+</header>
+{% endmacro %}
+
+{% macro article_body(doc) %}
+<div class="body">{{ doc.html | safe }}</div>
+{% endmacro %}
+
+{% macro back_link(url, label) %}
+<p style="margin-top:2rem"><a href="{{ url }}">← {{ label }}</a></p>
+{% endmacro %}

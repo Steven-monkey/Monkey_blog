@@ -1,0 +1,17 @@
+# 生产环境：仅运行 Flask web 容器
+# Nginx 反代由服务器上的宝塔面板管理
+services:
+  web:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+    env_file:
+      - .env
+    environment:
+      SQLITE_PATH: /app/data/blog.db
+    volumes:
+      - sqlite-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  sqlite-data:

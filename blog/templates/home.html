@@ -1,54 +1,69 @@
 {% extends "base.html" %}
 {% block title %}首页 · 个人博客{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
 {% block content %}
-<section class="hero">
-    <h1>你好，这是个人站点</h1>
-    <p>用来整理学习笔记、展示小实验；侧边「智慧箴言」沿用原来的 AI 箴言与配图能力。内容来自 Markdown，启动时同步到 SQLite。</p>
-    <div style="margin-top:1rem">
-        <a href="{{ url_for('ai_search_page') }}" class="btn-primary" style="display:inline-block;padding:0.6rem 1.2rem;border-radius:10px;background:linear-gradient(135deg,#2c4a7c,#3d5a8a);color:white;text-decoration:none;font-weight:600;font-size:0.95rem;">🔍 AI 智能搜索</a>
+{% from "macros/cards.html" import card_grid %}
+
+<!-- Hero -->
+<section class="hero-section">
+    <div class="hero-avatar">
+        <div class="avatar-placeholder">👨‍💻</div>
+    </div>
+    <h1 class="hero-title">Hi, 我是 <span class="highlight">Monkey</span></h1>
+    <p class="hero-subtitle">全栈开发者 & 终身学习者</p>
+    <p class="hero-description">
+        记录学习过程中的思考、实验和项目。
+        专注于 Python、Web 开发、AI 应用与云原生技术。
+    </p>
+    <div class="hero-actions">
+        <a href="{{ url_for('content.notes_list') }}" class="btn btn-primary">📝 浏览笔记</a>
+        <a href="{{ url_for('content.projects_list') }}" class="btn btn-ghost">🚀 查看项目</a>
     </div>
 </section>
 
-<h2 class="section-title">最近笔记</h2>
-{% if notes %}
-<div class="card-grid">
-    {% for n in notes[:6] %}
-    <article class="card">
-        <h2><a href="{{ url_for('note_detail', slug=n.slug) }}">{{ n.title }}</a></h2>
-        <div class="card-meta">{{ n.date }}</div>
-        <p>{{ n.summary }}</p>
-        {% if n.tags %}
-        <div class="tags">
-            {% for t in n.tags %}
-            <span class="tag">{{ t }}</span>
-            {% endfor %}
+<!-- About -->
+<section class="about-section">
+    <h2 class="section-title">关于</h2>
+    <div class="about-card">
+        <div class="about-text">
+            <p>这个博客是我整理学习笔记、展示小项目的个人站点。所有内容通过 Markdown 编写，启动时自动同步到 SQLite。内置 AI 智能搜索、阅读助手和智慧箴言功能。</p>
         </div>
-        {% endif %}
-    </article>
-    {% endfor %}
+        <div class="about-stats">
+            <div class="stat">
+                <span class="stat-number">{{ notes_count }}</span>
+                <span class="stat-label">篇笔记</span>
+            </div>
+            <div class="stat">
+                <span class="stat-number">{{ projects_count }}</span>
+                <span class="stat-label">个项目</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Latest Notes -->
+<div class="section-header">
+    <h2 class="section-title">最新笔记</h2>
+    <a href="{{ url_for('content.notes_list') }}" class="section-link">查看全部 →</a>
 </div>
+{% if notes %}
+{{ card_grid(notes[:6], item_type="note") }}
 {% else %}
 <p class="empty">暂无笔记，请在 <code>content/notes/</code> 添加 Markdown 后重启服务。</p>
 {% endif %}
 
-<h2 class="section-title">最近项目</h2>
-{% if projects %}
-<div class="card-grid">
-    {% for p in projects[:4] %}
-    <article class="card">
-        <h2><a href="{{ url_for('project_detail', slug=p.slug) }}">{{ p.title }}</a></h2>
-        <div class="card-meta">{{ p.date }}</div>
-        <p>{{ p.summary }}</p>
-        <div class="links-row">
-            {% if p.repo_url %}<a class="btn-outline" href="{{ p.repo_url }}" target="_blank" rel="noopener">仓库</a>{% endif %}
-            {% if p.demo_url %}<a class="btn-outline" href="{{ p.demo_url }}" target="_blank" rel="noopener">演示</a>{% endif %}
-        </div>
-    </article>
-    {% endfor %}
+<!-- Latest Projects -->
+<div class="section-header">
+    <h2 class="section-title">最新项目</h2>
+    <a href="{{ url_for('content.projects_list') }}" class="section-link">查看全部 →</a>
 </div>
+{% if projects %}
+{{ card_grid(projects[:4], item_type="project") }}
 {% else %}
 <p class="empty">暂无项目，请在 <code>content/projects/</code> 添加 Markdown。</p>
 {% endif %}
 
-<p class="footer-note">部署：<code>docker compose up --build</code> · SQLite：<span style="color: {% if db_ok %}#1a7f37{% else %}#b42318{% endif %}">{{ "可用" if db_ok else "不可用" }}</span></p>
+<p class="footer-note">部署：<code>docker compose up --build</code> · SQLite：<span style="color: {% if db_ok %}#22c55e{% else %}#ef4444{% endif %}">{{ "可用" if db_ok else "不可用" }}</span></p>
 {% endblock %}

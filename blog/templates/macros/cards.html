@@ -1,0 +1,26 @@
+{% macro card_grid(items, item_type="note") %}
+<div class="card-grid">
+  {% for item in items %}
+    {{ card(item, item_type) }}
+  {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro card(item, item_type="note") %}
+<article class="card">
+  <h2><a href="{{ url_for('content.note_detail' if item_type == 'note' else 'content.project_detail', slug=item.slug) }}">{{ item.title }}</a></h2>
+  <div class="card-meta">{{ item.date }}</div>
+  <p>{{ item.summary }}</p>
+  {% if item.tags %}
+  <div class="tags">
+    {% for t in item.tags %}<span class="tag">{{ t }}</span>{% endfor %}
+  </div>
+  {% endif %}
+  {% if item_type == "project" %}
+  <div class="links-row">
+    {% if item.repo_url %}<a class="btn-outline" href="{{ item.repo_url }}" target="_blank" rel="noopener">仓库</a>{% endif %}
+    {% if item.demo_url %}<a class="btn-outline" href="{{ item.demo_url }}" target="_blank" rel="noopener">演示</a>{% endif %}
+  </div>
+  {% endif %}
+</article>
+{% endmacro %}

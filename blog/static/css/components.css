@@ -1,87 +1,6 @@
-:root {
-  --bg: #f6f7fb;
-  --card: #ffffff;
-  --text: #1a2233;
-  --muted: #5c6578;
-  --accent: #2c4a7c;
-  --border: rgba(26, 34, 51, 0.08);
-  --radius: 14px;
-  --shadow: 0 12px 30px rgba(20, 30, 55, 0.08);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  font-family: "Segoe UI", "Noto Sans SC", system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-}
-
-a {
-  color: var(--accent);
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border);
-}
-
-.site-header-inner {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 0.85rem 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.brand {
-  font-weight: 700;
-  font-size: 1.05rem;
-  letter-spacing: -0.02em;
-}
-
-.brand a {
-  color: var(--text);
-}
-
-.nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 1rem;
-  font-size: 0.95rem;
-}
-
-.nav a {
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.nav a:hover {
-  color: var(--accent);
-}
-
-main {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 2rem 1.25rem 3rem;
-}
+/* ═══════════════════════════════════════════════════
+   Components: 卡片、标签、按钮、文章、代码块
+   ═══════════════════════════════════════════════════ */
 
 .hero {
   padding: 1.5rem 0 2rem;
@@ -128,7 +47,7 @@ main {
 
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 36px rgba(20, 30, 55, 0.12);
+  box-shadow: var(--shadow-lg);
 }
 
 .card h2 {
@@ -163,7 +82,7 @@ main {
   font-size: 0.72rem;
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
-  background: rgba(44, 74, 124, 0.08);
+  background: var(--accent-soft);
   color: var(--accent);
 }
 
@@ -205,7 +124,7 @@ main {
 }
 
 .article .body code {
-  background: rgba(15, 23, 42, 0.06);
+  background: var(--accent-soft);
   padding: 0.1rem 0.35rem;
   border-radius: 6px;
   font-size: 0.9em;
@@ -237,13 +156,54 @@ main {
   text-decoration: none;
 }
 
-.empty {
-  color: var(--muted);
-  font-size: 0.95rem;
+/* ── 现代按钮组件 ──────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.3rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn:hover {
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+.btn-primary {
+  background: var(--accent-gradient);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.btn-primary:hover {
+  box-shadow: var(--shadow-md);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
-.footer-note {
-  margin-top: 3rem;
-  font-size: 0.8rem;
-  color: var(--muted);
+/* ── 段落头部（标题 + 查看全部） ──────────── */
+.section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 2rem 0 1rem;
+}
+.section-header .section-title {
+  margin: 0;
+}
+.section-link {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--accent);
 }
