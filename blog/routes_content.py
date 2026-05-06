@@ -3,6 +3,7 @@
 from flask import Blueprint, abort, render_template
 
 from blog import sqlite_store
+from blog.config import AUTHOR_NAME
 from blog.db import get_db
 
 content_bp = Blueprint("content", __name__)
@@ -20,6 +21,7 @@ def blog_home():
         projects=projects,
         notes_count=len(notes),
         projects_count=len(projects),
+        author_name=AUTHOR_NAME,
         db_ok=st.ok,
     )
 

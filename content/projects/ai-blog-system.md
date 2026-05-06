@@ -2,7 +2,7 @@
 title: "AI 博客系统"
 date: 2026-05-01
 tags: ["Python", "Flask", "AI", "SQLite", "Docker"]
-repo: "https://github.com/yourname/ai-blog"
+repo: "https://github.com/Steven-monkey/Monkey_blog"
 summary: "一个集成 AI 功能的个人博客系统，支持智能搜索、阅读助手和内容推荐。"
 ---
 

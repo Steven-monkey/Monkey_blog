@@ -4,7 +4,7 @@ date: 2026-04-20
 tags:
   - Docker
   - Python
-repo: https://github.com/example/demo
+repo: https://github.com/Steven-monkey/Monkey_blog
 demo: ""
 summary: 用 Compose 编排 Web 与 SQLite 数据卷的最小可运行示例。
 ---

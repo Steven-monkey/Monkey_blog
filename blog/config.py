@@ -43,6 +43,9 @@ DOWNLOAD_HTTP_TIMEOUT_SECONDS = int(
 HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", "8080"))
 
+# ── 博客展示 ────────────────────────────────────────────
+AUTHOR_NAME = os.getenv("AUTHOR_NAME", "Monkey")
+
 # ── 回退箴言库 ────────────────────────────────────────────
 FALLBACK_QUOTES = [
     {"text": "生命不是等待风暴过去，而是学会在雨中起舞。", "author": "维维安·格林"},
