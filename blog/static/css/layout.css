@@ -1,161 +1,172 @@
 /* ═══════════════════════════════════════════════════
-   Layout: 导航、头部、页脚、进度条、回到顶部
+   Layout — 左侧边栏 + 阅读进度条 + 页脚
    ═══════════════════════════════════════════════════ */
 
-/* ── 导航栏 ──────────────────────────────────────── */
-.site-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
-}
-
-.site-header-inner {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0.75rem 1.25rem;
+/* ── 整体布局容器 ────────────────────────────────── */
+.app-layout {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
+  min-height: 100vh;
 }
 
-.brand {
-  font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: -0.02em;
+/* ── 左侧边栏 ────────────────────────────────────── */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: var(--sidebar-width);
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  padding: 2rem 1.5rem;
+  z-index: 50;
+  overflow-y: auto;
 }
 
-.brand a {
+.sidebar-brand {
+  font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em;
+  margin-bottom: 2.5rem;
+}
+.sidebar-brand a {
   color: var(--text-primary);
   background: var(--accent-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 
-.nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem 0.9rem;
-  font-size: 0.9rem;
-  align-items: center;
+.sidebar-nav {
+  display: flex; flex-direction: column; gap: 0.25rem;
+  flex: 1;
 }
 
-.nav a {
+.sidebar-nav a {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.55rem 0.75rem; border-radius: var(--radius-md);
+  font-size: 0.88rem; font-weight: 500;
   color: var(--text-secondary);
-  font-weight: 500;
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--radius-sm);
+  transition: all var(--transition);
 }
 
-.nav a:hover {
-  color: var(--accent);
-  background: var(--accent-soft);
+.sidebar-nav a:hover {
+  color: var(--text-primary); background: var(--bg-hover);
 }
 
-/* ── 主题切换按钮 ────────────────────────────────── */
-.theme-toggle {
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 0.3rem 0.55rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
+.sidebar-nav a.active {
+  color: var(--accent); background: var(--accent-soft);
 }
 
-.theme-toggle:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+.sidebar-nav .nav-icon {
+  font-size: 1rem; width: 20px; text-align: center;
 }
+
+.sidebar-footer {
+  margin-top: auto; padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.theme-toggle-sidebar {
+  width: 100%; display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.5rem 0.75rem; border-radius: var(--radius-md);
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text-secondary); font-size: 0.85rem; cursor: pointer;
+  font-family: var(--font-sans); transition: all var(--transition);
+}
+
+.theme-toggle-sidebar:hover {
+  border-color: var(--accent); color: var(--text-primary);
+}
+
+/* ── 主内容区 ────────────────────────────────────── */
+.main-content {
+  margin-left: var(--sidebar-width);
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column;
+}
+
+.page-main {
+  flex: 1;
+  max-width: var(--max-width);
+  margin: 0 auto; padding: 2.5rem 2rem 3rem;
+  width: 100%;
+}
+
+/* ── 顶部移动端导航（小屏替代侧边栏） ────────────── */
+.mobile-header {
+  display: none;
+  position: sticky; top: 0; z-index: 40;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1.25rem;
+}
+
+.mobile-header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.mobile-brand {
+  font-weight: 700; font-size: 0.95rem;
+}
+.mobile-brand a {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+.mobile-menu-btn {
+  background: none; border: 1px solid var(--border);
+  color: var(--text-primary); font-size: 1.2rem; cursor: pointer;
+  padding: 0.25rem 0.5rem; border-radius: var(--radius-sm);
+}
+
+/* ── 移动端侧边栏遮罩 ────────────────────────────── */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 55;
+}
+.sidebar-overlay.open { display: block; }
 
 /* ── 阅读进度条 ──────────────────────────────────── */
 #reading-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 0%;
-  height: 3px;
+  position: fixed; top: 0; left: 0;
+  width: 0%; height: 2px;
   background: var(--accent-gradient);
-  z-index: 100;
-  transition: width 100ms linear;
+  z-index: 100; transition: width 80ms linear;
 }
 
-/* ── 回到顶部按钮 ────────────────────────────────── */
+/* ── 回到顶部 ────────────────────────────────────── */
 .back-to-top {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  color: var(--text-primary);
-  font-size: 1.1rem;
-  cursor: pointer;
-  opacity: 0;
-  transform: translateY(20px);
-  pointer-events: none;
-  transition: opacity var(--transition), transform var(--transition);
-  z-index: 90;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: fixed; bottom: 2rem; right: 2rem;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text-secondary); font-size: 1rem; cursor: pointer;
+  opacity: 0; transform: translateY(20px); pointer-events: none;
+  transition: all var(--transition); z-index: 30;
+  display: flex; align-items: center; justify-content: center;
 }
-
-.back-to-top.visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.back-to-top:hover {
-  box-shadow: var(--glow);
-  border-color: var(--accent);
-}
-
-/* ── 主体内容 ────────────────────────────────────── */
-main {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 2rem 1.25rem 3rem;
-}
+.back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.back-to-top:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ── 页脚 ────────────────────────────────────────── */
 .site-footer {
   border-top: 1px solid var(--border);
-  padding: 2rem 1.25rem;
-  text-align: center;
-  color: var(--text-tertiary);
-  font-size: 0.82rem;
-  max-width: var(--max-width);
-  margin: 0 auto;
+  padding: 1.5rem 2rem; text-align: center;
+  color: var(--text-tertiary); font-size: 0.8rem;
+  margin-left: var(--sidebar-width);
 }
-
-.site-footer a {
-  color: var(--text-secondary);
-}
-
-.site-footer a:hover {
-  color: var(--accent);
-}
-
+.site-footer a { color: var(--text-secondary); }
+.site-footer a:hover { color: var(--accent); }
 .footer-links {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-bottom: 0.75rem;
-  flex-wrap: wrap;
+  display: flex; justify-content: center; gap: 1.5rem;
+  margin-bottom: 0.5rem; flex-wrap: wrap;
+}
+
+/* ── 响应式 ──────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .sidebar.open {
+    display: flex; position: fixed; z-index: 60;
+    width: 260px; box-shadow: var(--shadow-lg);
+  }
+
+  .main-content { margin-left: 0; }
+  .mobile-header { display: block; }
+  .page-main { padding: 1.5rem 1rem 2rem; }
+  .site-footer { margin-left: 0; }
 }

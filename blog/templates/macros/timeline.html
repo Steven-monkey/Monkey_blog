@@ -1,23 +1,14 @@
 {% macro timeline(items, item_type="note") %}
 <div class="timeline">
-  {% set ns = namespace(current_year="", current_month="") %}
+  {% set ns = namespace(current_year="") %}
   {% for item in items %}
     {% set item_year = item.date[:4] %}
-    {% set item_month = item.date[5:7] %}
-
     {% if item_year != ns.current_year %}
       {% set ns.current_year = item_year %}
-      {% set ns.current_month = item_month %}
       <div class="timeline-separator">
         <span class="timeline-year">{{ item_year }}</span>
       </div>
-    {% elif item_month != ns.current_month %}
-      {% set ns.current_month = item_month %}
-      <div class="timeline-separator">
-        <span class="timeline-month">{{ item_year }}年{{ item_month|int }}月</span>
-      </div>
     {% endif %}
-
     <div class="timeline-item">
       <div class="timeline-marker"></div>
       <div class="timeline-date">{{ item.date }}</div>
@@ -25,11 +16,9 @@
         <h2><a href="{{ url_for('content.note_detail' if item_type == 'note' else 'content.project_detail', slug=item.slug) }}">{{ item.title }}</a></h2>
         <p>{{ item.summary }}</p>
         {% if item.tags %}
-        <div class="tags">
-          {% for t in item.tags %}<span class="tag">{{ t }}</span>{% endfor %}
-        </div>
+        <div class="tags">{% for t in item.tags %}<span class="tag">{{ t }}</span>{% endfor %}</div>
         {% endif %}
-        {% if item_type == "project" %}
+        {% if item_type == "project" and (item.repo_url or item.demo_url) %}
         <div class="links-row">
           {% if item.repo_url %}<a class="btn-outline" href="{{ item.repo_url }}" target="_blank" rel="noopener">仓库</a>{% endif %}
           {% if item.demo_url %}<a class="btn-outline" href="{{ item.demo_url }}" target="_blank" rel="noopener">演示</a>{% endif %}

@@ -1,234 +1,152 @@
 /* ═══════════════════════════════════════════════════
-   Components: 卡片、标签、文章、Hero
+   Components — 卡片、文章、Hero、时间线
    ═══════════════════════════════════════════════════ */
 
-/* ── Hero 区域 ───────────────────────────────────── */
-.hero {
-  padding: 2rem 0 2.5rem;
-}
-
-.hero h1 {
-  margin: 0 0 0.5rem;
-  font-size: clamp(1.75rem, 4vw, 2.25rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-}
-
-.hero p {
-  margin: 0;
-  color: var(--text-secondary);
-  max-width: 52ch;
-  font-size: 1rem;
-}
-
-/* ── 段落头部 ────────────────────────────────────── */
-.section-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin: 2.5rem 0 1.25rem;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 0.75rem;
-}
-
-.section-title {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.section-link {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--accent);
-}
-
-.section-link:hover {
-  color: var(--accent-secondary);
-}
-
-/* ── 卡片（玻璃拟态） ────────────────────────────── */
+/* ── 卡片 ────────────────────────────────────────── */
 .card-grid {
-  display: grid;
-  gap: 1.25rem;
-}
-
-@media (min-width: 640px) {
-  .card-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  display: grid; gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
 .card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--glass-shadow);
-  padding: 1.5rem;
-  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  background: var(--bg-card); border-radius: var(--radius-lg);
+  border: 1px solid var(--border); padding: 1.4rem;
+  transition: all var(--transition); position: relative; overflow: hidden;
+}
+
+.card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--accent-gradient); opacity: 0;
+  transition: opacity var(--transition);
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--glass-shadow), var(--glow);
   border-color: var(--border-hover);
+  background: var(--bg-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
+.card:hover::before { opacity: 1; }
 
-.card h2 {
-  margin: 0 0 0.4rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.card h2 a {
-  color: var(--text-primary);
-}
-
-.card h2 a:hover {
-  color: var(--accent);
-}
+.card h2 { margin: 0 0 0.5rem; font-size: 1.05rem; font-weight: 600; }
+.card h2 a { color: var(--text-primary); }
+.card h2 a:hover { color: var(--accent); }
 
 .card-meta {
-  font-size: 0.8rem;
-  color: var(--text-tertiary);
-  margin-bottom: 0.6rem;
-  font-family: var(--font-mono);
+  font-size: 0.78rem; color: var(--text-tertiary);
+  font-family: var(--font-mono); margin-bottom: 0.6rem;
 }
 
 .card p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  line-height: 1.55;
+  margin: 0; font-size: 0.88rem; color: var(--text-secondary);
+  line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical; overflow: hidden;
 }
 
-/* ── 标签 ────────────────────────────────────────── */
-.tags {
-  margin-top: 0.75rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
+.card .tags { margin-top: 0.85rem; display: flex; flex-wrap: wrap; gap: 0.35rem; }
 
-.tag {
-  font-size: 0.72rem;
-  padding: 0.2rem 0.6rem;
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-weight: 500;
+.card .links-row { margin-top: 0.85rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ── Hero ────────────────────────────────────────── */
+.hero {
+  padding: 1rem 0 2rem;
 }
+.hero h1 {
+  margin: 0 0 0.5rem; font-size: clamp(1.6rem, 3.5vw, 2rem);
+  font-weight: 800; letter-spacing: -0.03em;
+}
+.hero p { margin: 0; color: var(--text-secondary); max-width: 56ch; font-size: 0.95rem; }
+
+/* ── 段落头部 ────────────────────────────────────── */
+.section-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin: 2.5rem 0 1rem;
+  border-bottom: 1px solid var(--border); padding-bottom: 0.6rem;
+}
+.section-title {
+  margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--text-primary);
+}
+.section-link {
+  font-size: 0.82rem; font-weight: 500; color: var(--text-secondary);
+}
+.section-link:hover { color: var(--accent); }
 
 /* ── 文章详情 ────────────────────────────────────── */
 .article {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--glass-shadow);
-  padding: 2rem 2.5rem;
+  max-width: 720px; margin: 0 auto;
 }
 
-.article header h1 {
-  margin: 0 0 0.35rem;
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 800;
-  letter-spacing: -0.02em;
+.article-header {
+  margin-bottom: 2rem; padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.article-header h1 {
+  margin: 0 0 0.6rem; font-size: clamp(1.65rem, 3vw, 2.1rem);
+  font-weight: 800; letter-spacing: -0.03em; line-height: 1.25;
   background: var(--accent-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 
-.article .meta {
-  color: var(--text-tertiary);
-  font-size: 0.85rem;
-  margin-bottom: 1.5rem;
+.article-meta {
+  display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+  font-size: 0.82rem; color: var(--text-tertiary);
   font-family: var(--font-mono);
 }
 
-.article .body {
-  font-size: 1rem;
-  line-height: 1.8;
-  color: var(--text-primary);
+.article-meta .tags { display: inline-flex; gap: 0.35rem; }
+
+.article-body {
+  font-size: 1rem; line-height: 1.85; color: var(--text-primary);
 }
 
-.article .body h2 {
-  margin-top: 2rem;
-  font-size: 1.4rem;
-  font-weight: 700;
+.article-body h2 {
+  margin: 2.5rem 0 1rem; font-size: 1.3rem; font-weight: 700;
+  padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+}
+
+.article-body h3 { margin: 1.8rem 0 0.8rem; font-size: 1.1rem; font-weight: 600; }
+
+.article-body p { margin: 1rem 0; }
+
+.article-body ul, .article-body ol { padding-left: 1.5rem; }
+.article-body li { margin: 0.35rem 0; }
+
+.article-body blockquote {
+  margin: 1.5rem 0; padding: 0.75rem 1rem 0.75rem 1.25rem;
   border-left: 3px solid var(--accent);
-  padding-left: 0.8rem;
+  background: var(--accent-soft); border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--text-secondary); font-style: italic;
 }
 
-.article .body h3 {
-  margin-top: 1.5rem;
-  font-size: 1.15rem;
-  font-weight: 600;
-}
+.article-body img { max-width: 100%; border-radius: var(--radius-md); margin: 1.25rem 0; }
 
-.article .body p {
-  margin: 1rem 0;
-}
+.article-body table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.9rem; }
+.article-body th, .article-body td { padding: 0.6rem 0.9rem; border: 1px solid var(--border); text-align: left; }
+.article-body th { background: var(--accent-soft); font-weight: 600; }
 
-.article .body ul,
-.article .body ol {
-  padding-left: 1.5rem;
-}
-
-.article .body li {
-  margin: 0.4rem 0;
-}
-
-.article .body blockquote {
-  border-left: 3px solid var(--accent-secondary);
-  margin: 1.5rem 0;
-  padding: 0.5rem 1rem;
+/* ── 返回链接 ────────────────────────────────────── */
+.back-link {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  margin-top: 2.5rem; font-size: 0.88rem; font-weight: 500;
   color: var(--text-secondary);
-  background: var(--accent-soft);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
+.back-link:hover { color: var(--accent); }
 
-.article .body img {
-  max-width: 100%;
-  border-radius: var(--radius-md);
-  margin: 1rem 0;
-}
-
-/* ── 链接行 ──────────────────────────────────────── */
-.links-row {
-  margin-top: 1rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-}
-
+/* ── 小按钮 ──────────────────────────────────────── */
 .btn-outline {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--accent);
-  transition: border-color var(--transition);
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.3rem 0.7rem; border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light); font-size: 0.82rem;
+  font-weight: 500; color: var(--text-secondary);
+  transition: all var(--transition);
 }
-
-.btn-outline:hover {
-  border-color: var(--accent);
-}
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 
 /* ── 响应式 ──────────────────────────────────────── */
 @media (max-width: 640px) {
-  .article {
-    padding: 1.25rem;
-  }
-  .card-grid {
-    grid-template-columns: 1fr;
-  }
+  .card-grid { grid-template-columns: 1fr; }
+  .article-header h1 { font-size: 1.4rem; }
+  .article-body { font-size: 0.95rem; }
 }

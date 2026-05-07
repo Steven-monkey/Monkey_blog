@@ -1,16 +1,25 @@
 /* ═══════════════════════════════════════════════════
-   Utilities: 空状态、工具类
+   Utilities
    ═══════════════════════════════════════════════════ */
 
 .empty {
-  color: var(--text-tertiary);
-  font-size: 0.95rem;
-  padding: 2rem 0;
+  color: var(--text-tertiary); font-size: 0.92rem;
+  padding: 2rem 0; text-align: center;
 }
 
 .footer-note {
-  margin-top: 3rem;
-  font-size: 0.8rem;
-  color: var(--text-tertiary);
-  text-align: center;
+  margin-top: 2.5rem; text-align: center;
+  font-size: 0.78rem; color: var(--text-tertiary);
+}
+
+/* 移动端侧边栏关闭按钮 */
+.sidebar-close {
+  display: none; background: none; border: 1px solid var(--border);
+  color: var(--text-secondary); font-size: 1rem; cursor: pointer;
+  padding: 0.25rem 0.5rem; border-radius: var(--radius-sm);
+  position: absolute; top: 1rem; right: 1rem;
+}
+
+@media (max-width: 768px) {
+  .sidebar-close { display: block; }
 }

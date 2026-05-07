@@ -5,44 +5,36 @@
 {% endblock %}
 {% block content %}
 
-<!-- Hero -->
-<section class="hero-section">
-    <div class="hero-avatar">
-        <div class="avatar-placeholder">👨‍💻</div>
-    </div>
-    <h1 class="hero-title">Hi, 我是 <span class="highlight">{{ author_name }}</span></h1>
-    <p class="hero-subtitle">全栈开发者 & 终身学习者</p>
-    <p class="hero-description">
-        记录学习过程中的思考、实验和项目。
-        专注于 Python、Web 开发、AI 应用与云原生技术。
+<section class="home-hero">
+    <div class="home-hero-avatar">👨‍💻</div>
+    <h1 class="home-hero-title">Hi, 我是 <span class="hl">{{ author_name }}</span></h1>
+    <p class="home-hero-sub">全栈开发者 & 终身学习者</p>
+    <p class="home-hero-desc">
+        记录学习过程中的思考、实验和项目。专注于 Python、Web 开发、AI 应用与云原生技术。
     </p>
-    <div class="hero-actions">
+    <div class="home-hero-actions">
         <a href="{{ url_for('content.notes_list') }}" class="btn btn-primary">📝 浏览笔记</a>
         <a href="{{ url_for('content.projects_list') }}" class="btn btn-ghost">🚀 查看项目</a>
     </div>
 </section>
 
-<!-- About -->
-<section class="about-section">
-    <h2 class="section-title">关于</h2>
-    <div class="about-card">
-        <div class="about-text">
-            <p>这个博客是我整理学习笔记、展示小项目的个人站点。所有内容通过 Markdown 编写，启动时自动同步到 SQLite。内置 AI 智能搜索、阅读助手和智慧箴言功能。</p>
-        </div>
-        <div class="about-stats">
-            <div class="stat">
-                <span class="stat-number">{{ notes_count }}</span>
-                <span class="stat-label">篇笔记</span>
-            </div>
-            <div class="stat">
-                <span class="stat-number">{{ projects_count }}</span>
-                <span class="stat-label">个项目</span>
-            </div>
-        </div>
+<div class="stats-row">
+    <div class="stat-item">
+        <span class="stat-num">{{ notes_count }}</span>
+        <span class="stat-label">篇笔记</span>
     </div>
-</section>
+    <div class="stat-item">
+        <span class="stat-num">{{ projects_count }}</span>
+        <span class="stat-label">个项目</span>
+    </div>
+</div>
 
-<!-- Latest Notes -->
+<div class="about-block">
+    <div class="about-text">
+        这个博客是我整理学习笔记、展示小项目的个人站点。内容通过 Markdown 编写，启动时自动同步到 SQLite。内置 AI 智能搜索、阅读助手和智慧箴言功能。
+    </div>
+</div>
+
 <div class="section-header">
     <h2 class="section-title">最新笔记</h2>
     <a href="{{ url_for('content.notes_list') }}" class="section-link">查看全部 →</a>
@@ -54,19 +46,14 @@
         <h2><a href="{{ url_for('content.note_detail', slug=n.slug) }}">{{ n.title }}</a></h2>
         <div class="card-meta">{{ n.date }}</div>
         <p>{{ n.summary }}</p>
-        {% if n.tags %}
-        <div class="tags">
-            {% for t in n.tags %}<span class="tag">{{ t }}</span>{% endfor %}
-        </div>
-        {% endif %}
+        {% if n.tags %}<div class="tags">{% for t in n.tags %}<span class="tag">{{ t }}</span>{% endfor %}</div>{% endif %}
     </article>
     {% endfor %}
 </div>
 {% else %}
-<p class="empty">暂无笔记，请在 <code>content/notes/</code> 添加 Markdown 后重启服务。</p>
+<p class="empty">暂无笔记</p>
 {% endif %}
 
-<!-- Latest Projects -->
 <div class="section-header">
     <h2 class="section-title">最新项目</h2>
     <a href="{{ url_for('content.projects_list') }}" class="section-link">查看全部 →</a>
@@ -88,8 +75,8 @@
     {% endfor %}
 </div>
 {% else %}
-<p class="empty">暂无项目，请在 <code>content/projects/</code> 添加 Markdown。</p>
+<p class="empty">暂无项目</p>
 {% endif %}
 
-<p class="footer-note">部署：<code>docker compose up --build</code> · SQLite：<span style="color: var(--success)">{{ "可用" if db_ok else "不可用" }}</span></p>
+<p class="footer-note">SQLite：<span style="color: {{ '#34d399' if db_ok else '#f87171' }}">{{ "可用" if db_ok else "不可用" }}</span></p>
 {% endblock %}

@@ -8,17 +8,14 @@
 {% from "macros/article.html" import article_header, article_body, back_link %}
 
 {% if doc.toc_html %}
-<button id="tocToggle" class="toc-toggle" onclick="document.getElementById('tocNav').classList.toggle('open')" aria-label="目录">📑</button>
-<nav id="tocNav" class="toc-nav">
-  <div class="toc-content">{{ doc.toc_html | safe }}</div>
-</nav>
+<button id="tocToggle" class="toc-toggle" onclick="document.getElementById('tocNav').classList.toggle('open')">📑</button>
+<nav id="tocNav" class="toc-nav"><div class="toc-content">{{ doc.toc_html | safe }}</div></nav>
 {% endif %}
 
 <article class="article">
     {{ article_header(doc, show_tags=True) }}
     {{ article_body(doc) }}
     {{ back_link(url_for('content.notes_list'), '返回笔记列表') }}
-
     {% include "components/recommend_section.html" %}
 </article>
 

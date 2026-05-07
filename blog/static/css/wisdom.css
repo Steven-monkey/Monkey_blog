@@ -1,148 +1,88 @@
 /* ═══════════════════════════════════════════════════
-   智慧箴言 独立页面样式
+   智慧箴言
    ═══════════════════════════════════════════════════ */
 
 .wisdom-standalone {
-    min-height: calc(100vh - 56px);
-    background: var(--bg-deep);
-    font-family: var(--font-sans);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
-    position: relative;
+  min-height: calc(100vh - 100px);
+  background: var(--bg-deep);
+  font-family: var(--font-sans);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem; position: relative;
 }
 .wisdom-standalone::before {
-    content: "";
-    position: absolute;
-    width: 100%; height: 100%;
-    background: radial-gradient(circle at 20% 30%, var(--accent-soft), transparent 70%);
-    pointer-events: none;
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 20% 30%, var(--accent-soft), transparent 70%);
+  pointer-events: none;
 }
+
 .wisdom-card {
-    max-width: 720px; width: 100%;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 2.5rem;
-    box-shadow: var(--glass-shadow);
-    padding: 2rem;
-    transition: transform 0.25s ease;
-    border: 1px solid var(--glass-border);
-    position: relative; z-index: 1;
+  max-width: 640px; width: 100%;
+  background: var(--bg-card); border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg); border: 1px solid var(--border);
+  padding: 2rem; position: relative; z-index: 1;
 }
-.wisdom-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--glass-shadow), var(--glow);
-}
+
 .card-header {
-    display: flex; justify-content: space-between; align-items: baseline;
-    flex-wrap: wrap; margin-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;
+  display: flex; justify-content: space-between; align-items: baseline;
+  flex-wrap: wrap; margin-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border); padding-bottom: 0.65rem;
 }
 .wisdom-title {
-    font-size: 1.8rem; font-weight: 700;
-    background: var(--accent-gradient);
-    -webkit-background-clip: text; background-clip: text;
-    color: transparent; letter-spacing: -0.3px;
-    display: inline-flex; align-items: center; gap: 8px;
+  font-size: 1.5rem; font-weight: 700;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  display: inline-flex; align-items: center; gap: 8px;
 }
 .live-clock {
-    font-family: var(--font-mono); font-size: 0.82rem;
-    background: var(--accent-soft); padding: 0.3rem 0.9rem;
-    border-radius: 40px; color: var(--text-secondary); font-weight: 500;
+  font-family: var(--font-mono); font-size: 0.78rem;
+  background: var(--accent-soft); padding: 0.3rem 0.8rem;
+  border-radius: 40px; color: var(--text-secondary);
 }
-.quote-container { margin: 2rem 0 1.5rem; text-align: center; }
+
+.quote-container { margin: 1.5rem 0; text-align: center; }
 .scene-wrapper {
-    width: min(100%, 360px); margin: 0.6rem auto 1.2rem;
-    border-radius: 1.2rem; overflow: hidden;
-    box-shadow: var(--shadow-md); position: relative;
-    border: 1px solid var(--border);
+  width: min(100%, 320px); margin: 0.5rem auto 1rem;
+  border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: var(--shadow-md); border: 1px solid var(--border);
 }
-.scene-image {
-    width: 100%; aspect-ratio: 9 / 16; object-fit: cover;
-    display: block; transition: transform 0.35s ease;
-}
-.scene-wrapper:hover .scene-image { transform: scale(1.02); }
-.scene-tag {
-    position: absolute; left: 10px; bottom: 10px;
-    padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.7rem;
-    color: #eef3ff; background: rgba(18, 33, 58, 0.72); backdrop-filter: blur(2px);
-}
-.quote-icon { font-size: 3rem; opacity: 0.4; color: var(--accent); margin-bottom: 0.5rem; }
-.quote-text {
-    font-size: 1.85rem; line-height: 1.55; font-weight: 500;
-    color: var(--text-primary); margin: 0.75rem 0 1rem;
-    word-break: break-word; letter-spacing: 0.5px;
-}
-.quote-author {
-    font-size: 1rem; color: var(--text-secondary);
-    margin-top: 0.5rem; border-top: 1px solid var(--border);
-    display: inline-block; padding-top: 0.65rem; padding-right: 0.5rem;
-}
-.author-prefix { font-weight: 300; margin-right: 4px; }
-.button-group {
-    display: flex; flex-wrap: wrap; justify-content: center;
-    gap: 1rem; margin: 1.5rem 0 0.8rem;
-}
+.scene-image { width: 100%; aspect-ratio: 9/16; object-fit: cover; display: block; }
+.quote-icon { font-size: 2.5rem; opacity: 0.3; color: var(--accent); margin-bottom: 0.3rem; }
+.quote-text { font-size: 1.65rem; line-height: 1.55; font-weight: 500; color: var(--text-primary); margin: 0.5rem 0 0.75rem; }
+.quote-author { font-size: 0.95rem; color: var(--text-secondary); border-top: 1px solid var(--border); display: inline-block; padding-top: 0.5rem; }
+
+.button-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin: 1.25rem 0 0.6rem; }
 .wisdom-btn {
-    border: none; padding: 0.85rem 1.8rem; border-radius: 60px;
-    font-size: 1rem; font-weight: 600; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 10px;
-    transition: all 0.25s ease; letter-spacing: 0.5px;
-    box-shadow: var(--shadow-sm);
+  border: none; padding: 0.65rem 1.4rem; border-radius: 60px;
+  font-size: 0.9rem; font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: all var(--transition); font-family: var(--font-sans);
 }
-.wisdom-btn-primary {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    color: var(--text-primary);
-    border: 1px solid var(--glass-border);
-}
-.wisdom-btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--accent); }
-.wisdom-btn-accent {
-    background: var(--accent-gradient);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-.wisdom-btn-accent:hover { transform: translateY(-2px); }
-.wisdom-btn:active { transform: scale(0.97); }
-.wisdom-btn:disabled { opacity: 0.65; cursor: wait; }
+.wisdom-btn-primary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border); }
+.wisdom-btn-primary:hover { border-color: var(--accent); }
+.wisdom-btn-accent { background: var(--accent-gradient); color: #fff; }
+.wisdom-btn-accent:hover { box-shadow: 0 4px 16px rgba(99,102,241,0.3); }
+.wisdom-btn:disabled { opacity: 0.6; cursor: wait; }
+
 .api-section {
-    margin-top: 1.2rem; display: flex; justify-content: center;
-    align-items: center; gap: 0.8rem; flex-wrap: wrap; font-size: 0.75rem;
-    border-top: 1px dashed var(--border); padding-top: 1rem;
+  margin-top: 1rem; display: flex; justify-content: center;
+  align-items: center; gap: 0.6rem; flex-wrap: wrap; font-size: 0.72rem;
+  border-top: 1px dashed var(--border); padding-top: 0.85rem;
 }
-.api-status {
-    background: var(--accent-soft); padding: 0.25rem 0.8rem;
-    border-radius: 30px; color: var(--text-secondary); font-weight: 500;
-    display: inline-flex; align-items: center; gap: 6px;
-}
-.mini-btn {
-    background: var(--accent-soft); border: none;
-    font-size: 0.72rem; cursor: pointer; color: var(--text-tertiary);
-    padding: 0.25rem 0.6rem; border-radius: 20px; transition: 0.2s;
-}
-.mini-btn:hover { background: var(--border); color: var(--text-primary); }
-.status-tip { margin-top: 0.7rem; text-align: center; min-height: 1.2rem; color: var(--text-secondary); font-size: 0.85rem; }
+.api-status { background: var(--accent-soft); padding: 0.2rem 0.7rem; border-radius: 30px; color: var(--text-secondary); }
+.mini-btn { background: var(--accent-soft); border: none; font-size: 0.7rem; cursor: pointer; color: var(--text-tertiary); padding: 0.2rem 0.5rem; border-radius: 20px; }
+.status-tip { margin-top: 0.6rem; text-align: center; min-height: 1rem; color: var(--text-secondary); font-size: 0.8rem; }
 .status-tip.error { color: var(--error); }
-.wisdom-footer-note {
-    margin-top: 1.2rem; text-align: center; font-size: 0.7rem;
-    color: var(--text-tertiary); display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;
-}
+.wisdom-footer-note { margin-top: 0.8rem; text-align: center; font-size: 0.68rem; color: var(--text-tertiary); display: flex; justify-content: center; gap: 0.8rem; flex-wrap: wrap; }
+
 @keyframes gentleFade { 0% { opacity: 0.5; transform: translateY(6px); } 100% { opacity: 1; transform: translateY(0); } }
-.quote-animate { animation: gentleFade 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards; }
-.wisdom-loader {
-    display: inline-block; width: 16px; height: 16px;
-    border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
-    border-top-color: #c0d4ff; border-right-color: #c0d4ff;
-    animation: spin 0.8s linear infinite; margin-left: 6px;
-}
+.quote-animate { animation: gentleFade 0.35s ease forwards; }
+
+.wisdom-loader { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #c0d4ff; animation: spin 0.8s linear infinite; margin-left: 4px; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
 @media (max-width: 550px) {
-    .wisdom-card { padding: 1.4rem; }
-    .quote-text { font-size: 1.5rem; }
-    .wisdom-btn { padding: 0.6rem 1.2rem; font-size: 0.9rem; }
-    .button-group { gap: 0.7rem; }
-    .wisdom-title { font-size: 1.4rem; }
+  .wisdom-card { padding: 1.25rem; }
+  .quote-text { font-size: 1.35rem; }
+  .wisdom-btn { padding: 0.5rem 1rem; font-size: 0.82rem; }
+  .wisdom-title { font-size: 1.3rem; }
 }

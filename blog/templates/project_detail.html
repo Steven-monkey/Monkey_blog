@@ -8,21 +8,18 @@
 {% from "macros/article.html" import article_header, article_body, back_link %}
 
 {% if doc.toc_html %}
-<button id="tocToggle" class="toc-toggle" onclick="document.getElementById('tocNav').classList.toggle('open')" aria-label="目录">📑</button>
-<nav id="tocNav" class="toc-nav">
-  <div class="toc-content">{{ doc.toc_html | safe }}</div>
-</nav>
+<button id="tocToggle" class="toc-toggle" onclick="document.getElementById('tocNav').classList.toggle('open')">📑</button>
+<nav id="tocNav" class="toc-nav"><div class="toc-content">{{ doc.toc_html | safe }}</div></nav>
 {% endif %}
 
 <article class="article">
     {{ article_header(doc, show_tags=False) }}
-    <div class="links-row">
-        {% if doc.repo_url %}<a class="btn-outline" href="{{ doc.repo_url }}" target="_blank" rel="noopener">仓库</a>{% endif %}
-        {% if doc.demo_url %}<a class="btn-outline" href="{{ doc.demo_url }}" target="_blank" rel="noopener">演示</a>{% endif %}
+    <div style="margin-bottom:1.5rem;display:flex;gap:0.5rem;flex-wrap:wrap">
+        {% if doc.repo_url %}<a class="btn-outline" href="{{ doc.repo_url }}" target="_blank" rel="noopener">🔗 仓库</a>{% endif %}
+        {% if doc.demo_url %}<a class="btn-outline" href="{{ doc.demo_url }}" target="_blank" rel="noopener">🌐 演示</a>{% endif %}
     </div>
     {{ article_body(doc) }}
     {{ back_link(url_for('content.projects_list'), '返回项目列表') }}
-
     {% include "components/recommend_section.html" %}
 </article>
 

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}笔记列表 · 个人博客{% endblock %}
+{% block title %}笔记 · 个人博客{% endblock %}
 {% block extra_head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/timeline.css') }}">
 {% endblock %}
@@ -14,6 +14,6 @@
 {% if items %}
 {{ timeline(items, item_type="note") }}
 {% else %}
-<p class="empty">暂无笔记，请在 <code>content/notes/</code> 添加 Markdown 后重启服务。</p>
+<p class="empty">暂无笔记</p>
 {% endif %}
 {% endblock %}

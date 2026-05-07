@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}项目列表 · 个人博客{% endblock %}
+{% block title %}项目 · 个人博客{% endblock %}
 {% block extra_head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/timeline.css') }}">
 {% endblock %}
@@ -14,6 +14,6 @@
 {% if items %}
 {{ timeline(items, item_type="project") }}
 {% else %}
-<p class="empty">暂无项目，请在 <code>content/projects/</code> 添加 Markdown。</p>
+<p class="empty">暂无项目</p>
 {% endif %}
 {% endblock %}

@@ -14,36 +14,69 @@
 <body>
 <div id="reading-progress"></div>
 
-<header class="site-header">
-    <div class="site-header-inner">
-        <div class="brand"><a href="{{ url_for('content.blog_home') }}">学习笔记 · 小项目</a></div>
-        <nav class="nav" aria-label="主导航">
-            <a href="{{ url_for('content.blog_home') }}">首页</a>
-            <a href="{{ url_for('content.notes_list') }}">笔记</a>
-            <a href="{{ url_for('content.projects_list') }}">项目</a>
-            <a href="{{ url_for('content.ai_search_page') }}">AI 搜索</a>
-            <a href="{{ url_for('content.wisdom_page') }}">智慧箴言</a>
-            <button id="themeToggle" class="theme-toggle" aria-label="切换主题" title="切换深色/浅色模式">
-                <span class="icon-light">☀️</span>
-                <span class="icon-dark">🌙</span>
-            </button>
-        </nav>
+<!-- 移动端顶部导航 -->
+<header class="mobile-header">
+    <div class="mobile-header-inner">
+        <div class="mobile-brand"><a href="{{ url_for('content.blog_home') }}">学习笔记 · 小项目</a></div>
+        <button class="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('open')" aria-label="菜单">☰</button>
     </div>
 </header>
-<main>
-    {% block content %}{% endblock %}
-</main>
 
-<footer class="site-footer">
-    <div class="footer-links">
-        <a href="{{ url_for('content.blog_home') }}">首页</a>
-        <a href="{{ url_for('content.notes_list') }}">笔记</a>
-        <a href="{{ url_for('content.projects_list') }}">项目</a>
-        <a href="{{ url_for('content.ai_search_page') }}">AI 搜索</a>
-        <a href="{{ url_for('content.wisdom_page') }}">智慧箴言</a>
+<div class="app-layout">
+    <!-- 侧边栏遮罩（移动端） -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="document.getElementById('sidebar').classList.remove('open');this.classList.remove('open')"></div>
+
+    <!-- 左侧边栏 -->
+    <aside class="sidebar" id="sidebar">
+        <button class="sidebar-close" onclick="document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open')">✕</button>
+
+        <div class="sidebar-brand">
+            <a href="{{ url_for('content.blog_home') }}">Notes & Projects</a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('content.blog_home') }}" {% if request.endpoint == 'content.blog_home' %}class="active"{% endif %}>
+                <span class="nav-icon">🏠</span> 首页
+            </a>
+            <a href="{{ url_for('content.notes_list') }}" {% if request.endpoint == 'content.notes_list' %}class="active"{% endif %}>
+                <span class="nav-icon">📝</span> 笔记
+            </a>
+            <a href="{{ url_for('content.projects_list') }}" {% if request.endpoint == 'content.projects_list' %}class="active"{% endif %}>
+                <span class="nav-icon">🚀</span> 项目
+            </a>
+            <a href="{{ url_for('content.ai_search_page') }}" {% if request.endpoint == 'content.ai_search_page' %}class="active"{% endif %}>
+                <span class="nav-icon">🔍</span> AI 搜索
+            </a>
+            <a href="{{ url_for('content.wisdom_page') }}" {% if request.endpoint == 'content.wisdom_page' %}class="active"{% endif %}>
+                <span class="nav-icon">✨</span> 智慧箴言
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button id="themeToggle" class="theme-toggle-sidebar">
+                <span>🌙</span> <span>主题切换</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <main class="page-main">
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="site-footer">
+            <div class="footer-links">
+                <a href="{{ url_for('content.blog_home') }}">首页</a>
+                <a href="{{ url_for('content.notes_list') }}">笔记</a>
+                <a href="{{ url_for('content.projects_list') }}">项目</a>
+                <a href="{{ url_for('content.ai_search_page') }}">AI 搜索</a>
+                <a href="{{ url_for('content.wisdom_page') }}">智慧箴言</a>
+            </div>
+            <div>&copy; {{ now.year }} {{ author_name }}</div>
+        </footer>
     </div>
-    <div>&copy; {{ now.year }} {{ author_name }} · 由 Flask + SQLite 驱动</div>
-</footer>
+</div>
 
 <button id="backToTop" class="back-to-top" aria-label="回到顶部">↑</button>
 
