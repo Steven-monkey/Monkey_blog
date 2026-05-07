@@ -1,4 +1,7 @@
-"""AI API 路由：智能搜索、阅读助手、内容推荐。"""
+"""AI API 路由 —— 智能搜索、阅读助手、内容推荐。
+
+全部注册在 ai_bp Blueprint 下。
+"""
 
 from flask import Blueprint, Response, jsonify, request, stream_with_context
 
@@ -10,6 +13,7 @@ ai_bp = Blueprint("ai", __name__)
 
 @ai_bp.post("/api/ai/search")
 def api_ai_search():
+    """AI 智能搜索 —— 自然语言查询笔记和项目。"""
     data = request.get_json(silent=True) or {}
     query = (data.get("q") or "").strip()
     if not query:
@@ -21,6 +25,7 @@ def api_ai_search():
 
 @ai_bp.post("/api/ai/chat")
 def api_ai_chat():
+    """AI 阅读助手 —— SSE 流式聊天，基于文章内容回答用户问题。"""
     data = request.get_json(silent=True) or {}
     content_type = data.get("content_type", "")
     slug = data.get("slug", "")
@@ -35,6 +40,7 @@ def api_ai_chat():
     conn = get_db()
 
     def event_stream():
+        """生成 SSE 事件流。"""
         for chunk in ai_service.ai_chat_stream(
             conn, content_type, slug, message, history
         ):
@@ -46,13 +52,14 @@ def api_ai_chat():
         mimetype="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",
+            "X-Accel-Buffering": "no",   # Nginx 不缓冲 SSE
         },
     )
 
 
 @ai_bp.post("/api/ai/recommend")
 def api_ai_recommend():
+    """AI 内容推荐 —— 基于标签相似度 + AI 推荐理由。"""
     data = request.get_json(silent=True) or {}
     content_type = data.get("type", "")
     slug = data.get("slug", "")
@@ -70,4 +77,5 @@ def api_ai_recommend():
 
 @ai_bp.get("/api/ai/status")
 def api_ai_status():
+    """AI 服务状态查询。"""
     return jsonify(ai_service.ai_status())

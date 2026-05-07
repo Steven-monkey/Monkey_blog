@@ -1,4 +1,13 @@
-"""从 content/ 下 Markdown 同步到 SQLite。"""
+"""内容同步 —— 将 content/ 下 Markdown 解析并写入 SQLite。
+
+启动时由 bootstrap_db() 调用 sync_all()：
+1. 遍历 content/notes/ 和 content/projects/ 下所有 .md 文件
+2. 解析 YAML Front Matter（标题/日期/标签/摘要等）
+3. Markdown → HTML 渲染（含 TOC + 代码高亮）
+4. 可选：AI 自动生成缺失的标签和摘要
+5. 写入 SQLite，清理已删除文件
+"""
+
 from __future__ import annotations
 
 import re
@@ -14,16 +23,22 @@ from blog import sqlite_store as store
 
 _AI_AVAILABLE = ai_service.AI_ENABLED
 
-# 仓库根目录（与 blog/ 并列的 content/）
+# 仓库根目录（content/ 与 blog/ 并列）
 ROOT_DIR = Path(__file__).resolve().parent.parent
 CONTENT_DIR = ROOT_DIR / "content"
 NOTES_DIR = CONTENT_DIR / "notes"
 PROJECTS_DIR = CONTENT_DIR / "projects"
 
+# Markdown 渲染扩展
+#  - extra: 表格/脚注/缩写等
+#  - toc: 自动生成目录
+#  - sane_lists: 更合理的列表行为
+#  - codehilite: 代码语法高亮
 MD_EXTENSIONS = ["extra", "toc", "sane_lists", "codehilite"]
 
 
 def _default_summary_from_md(text: str, max_len: int = 160) -> str:
+    """简单降级摘要：去除 Markdown 标记后截取前 N 字符。"""
     plain = re.sub(r"```.*?```", " ", text, flags=re.DOTALL)
     plain = re.sub(r"`[^`]+`", " ", plain)
     plain = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", plain)
@@ -35,6 +50,7 @@ def _default_summary_from_md(text: str, max_len: int = 160) -> str:
 
 
 def _render_html(md_body: str) -> tuple[str, str]:
+    """将 Markdown 渲染为 HTML，返回 (正文HTML, 目录HTML)。"""
     md = markdown.Markdown(extensions=MD_EXTENSIONS)
     body_html = md.convert(md_body)
     toc_html = getattr(md, 'toc', '') or ''
@@ -42,6 +58,7 @@ def _render_html(md_body: str) -> tuple[str, str]:
 
 
 def _parse_tags(meta: dict) -> list[str]:
+    """从 Front Matter 提取标签列表。"""
     raw = meta.get("tags")
     if raw is None:
         return []
@@ -53,6 +70,7 @@ def _parse_tags(meta: dict) -> list[str]:
 
 
 def _slug_from_meta_or_file(meta: dict, path: Path) -> str:
+    """URL 标识符：优先用 front matter 的 slug，否则用文件名。"""
     s = meta.get("slug")
     if s and str(s).strip():
         return str(s).strip()
@@ -60,6 +78,7 @@ def _slug_from_meta_or_file(meta: dict, path: Path) -> str:
 
 
 def _date_from_meta(meta: dict, path: Path) -> str:
+    """提取日期：优先用 front matter，否则用文件修改时间。"""
     d = meta.get("date")
     if d is None:
         ts = path.stat().st_mtime
@@ -73,6 +92,7 @@ def _date_from_meta(meta: dict, path: Path) -> str:
 
 
 def _load_md_dir(directory: Path) -> list[tuple[Path, dict, str]]:
+    """加载目录下所有 .md 文件，返回 (路径, front_matter_dict, 正文)。"""
     if not directory.exists():
         return []
     out: list[tuple[Path, dict, str]] = []
@@ -87,7 +107,7 @@ def _load_md_dir(directory: Path) -> list[tuple[Path, dict, str]]:
 def _maybe_enrich_with_ai(
     title: str, body: str, meta: dict
 ) -> tuple[list[str], str]:
-    """如果 front matter 缺少 tags 或 summary，尝试用 AI 生成。"""
+    """如果 front matter 缺少 tags 或 summary，尝试用 AI 自动生成。"""
     tags = _parse_tags(meta)
     summary = str(meta.get("summary") or "").strip()
 
@@ -107,10 +127,13 @@ def _maybe_enrich_with_ai(
 
 
 def sync_all(conn: sqlite3.Connection) -> tuple[int, int]:
-    """将磁盘 Markdown 写入 SQLite，并删除已移除文件的条目。"""
+    """将磁盘 Markdown 写入 SQLite，并删除已移除文件的条目。
+    返回 (笔记数, 项目数)。
+    """
     note_slugs: set[str] = set()
     project_slugs: set[str] = set()
 
+    # ── 同步笔记 ──
     for path, meta, body in _load_md_dir(NOTES_DIR):
         slug = _slug_from_meta_or_file(meta, path)
         note_slugs.add(slug)
@@ -119,17 +142,12 @@ def sync_all(conn: sqlite3.Connection) -> tuple[int, int]:
         tags, summary = _maybe_enrich_with_ai(title, body, meta)
         html, toc_html = _render_html(body)
         store.save_note(
-            conn,
-            slug=slug,
-            title=title,
-            date_iso=date_iso,
-            tags=tags,
-            summary=summary,
-            body_md=body,
-            html=html,
-            toc_html=toc_html,
+            conn, slug=slug, title=title, date_iso=date_iso,
+            tags=tags, summary=summary, body_md=body,
+            html=html, toc_html=toc_html,
         )
 
+    # ── 同步项目 ──
     for path, meta, body in _load_md_dir(PROJECTS_DIR):
         slug = _slug_from_meta_or_file(meta, path)
         project_slugs.add(slug)
@@ -140,19 +158,13 @@ def sync_all(conn: sqlite3.Connection) -> tuple[int, int]:
         repo_url = str(meta.get("repo") or meta.get("repo_url") or "").strip()
         demo_url = str(meta.get("demo") or meta.get("demo_url") or "").strip()
         store.save_project(
-            conn,
-            slug=slug,
-            title=title,
-            date_iso=date_iso,
-            tags=tags,
-            summary=summary,
-            body_md=body,
-            html=html,
-            toc_html=toc_html,
-            repo_url=repo_url,
-            demo_url=demo_url,
+            conn, slug=slug, title=title, date_iso=date_iso,
+            tags=tags, summary=summary, body_md=body,
+            html=html, toc_html=toc_html,
+            repo_url=repo_url, demo_url=demo_url,
         )
 
+    # ── 清理已删除的文件 ──
     store.sync_cleanup_removed(
         conn, note_slugs=note_slugs, project_slugs=project_slugs
     )

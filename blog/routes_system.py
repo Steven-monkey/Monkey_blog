@@ -1,15 +1,10 @@
-"""系统路由：健康检查、LLM 状态。"""
+"""系统路由 —— 健康检查、LLM 配置状态。"""
 
 from flask import Blueprint, jsonify
 
 from blog.config import (
-    IMAGE_API_BASE,
-    IMAGE_API_KEY,
-    IMAGE_HEIGHT,
-    IMAGE_MODEL,
-    IMAGE_WIDTH,
-    LLM_API_KEY,
-    LLM_MODEL,
+    IMAGE_API_BASE, IMAGE_API_KEY, IMAGE_HEIGHT,
+    IMAGE_MODEL, IMAGE_WIDTH, LLM_API_KEY, LLM_MODEL,
 )
 from blog.db import get_db
 from blog.sqlite_store import ping_db
@@ -19,6 +14,7 @@ system_bp = Blueprint("system", __name__)
 
 @system_bp.get("/healthz")
 def healthz():
+    """健康检查端点 —— Docker / Nginx 反代探测用。"""
     conn = get_db()
     ok = ping_db(conn)
     return jsonify({"ok": True, "sqlite": ok})
@@ -27,6 +23,7 @@ def healthz():
 @system_bp.get("/api/llm/status")
 @system_bp.get("/api/deepseek/status")
 def llm_status():
+    """返回当前 LLM 和生图 API 的配置状态。"""
     return jsonify(
         {
             "configured": bool(LLM_API_KEY),

@@ -1,10 +1,12 @@
-"""智慧箴言服务：LLM 生成箴言、生图、下载。"""
+"""智慧箴言服务 —— LLM 生成箴言、调用生图 API、下载外部图片。
+
+由 routes_wisdom.py 调用，不直接处理 HTTP 请求/响应。
+所有函数返回纯数据或 (bytes, content_type) 元组。
+"""
 
 import base64
 import json
 import random
-from io import BytesIO
-from urllib.parse import quote
 
 import requests
 
@@ -29,18 +31,16 @@ from blog.config import (
 
 
 def fallback_quote(note: str = ""):
+    """从本地箴言库随机取一条。"""
     item = random.choice(FALLBACK_QUOTES)
-    result = {
-        "text": item["text"],
-        "author": item["author"],
-        "source": "fallback",
-    }
+    result = {"text": item["text"], "author": item["author"], "source": "fallback"}
     if note:
         result["note"] = note
     return result
 
 
 def request_llm_quote():
+    """调用 LLM 生成一句箴言 + 视觉提示词（JSON mode）。"""
     system_prompt = (
         "你是一位深谙生命力量的箴言大师，你的每一句话都能点燃灵魂。"
         "你从全球不同文明的智慧中汲取灵感，创作短小精悍、意象鲜明、充满生命力的哲理短句。"
@@ -54,8 +54,9 @@ def request_llm_quote():
         "同时，为这句箴言构思一幅精美的竖屏背景图，要求描述详细，包括："
         "光影、色彩、构图、情绪，必须与箴言意境完美契合，不出现文字，不出现人物特写。\n"
         "请严格按照以下JSON格式输出，不要添加任何额外内容：\n"
-        '{"quote":"箴言内容","author":"作者/文化标签","visual_prompt":"中文视觉描述，适合生成高质感竖屏壁纸，包含电影级光影、柔和焦外等关键词"}'
+        '{"quote":"箴言内容","author":"作者/文化标签","visual_prompt":"中文视觉描述"}'
     )
+
     payload = {
         "model": LLM_MODEL,
         "temperature": 0.9,
@@ -66,6 +67,7 @@ def request_llm_quote():
             {"role": "user", "content": user_prompt},
         ],
     }
+
     request_url = _normalize_api_url(LLM_API_URL)
     response = HTTP_SESSION.post(
         request_url,
@@ -105,17 +107,18 @@ def request_llm_quote():
 
 
 def build_fallback_visual_prompt(text: str, author: str) -> str:
-    quote_text = (text or "").strip()
-    author_text = (author or "").strip() or "未知来源"
+    """生成通用视觉提示词（无特定箴言信息时使用）。"""
     return (
         f"9:16竖屏艺术摄影，电影级光影，柔和焦外，色彩温柔而富有生命力，意境深邃。"
-        f"主题围绕箴言：{quote_text}；文化灵感：{author_text}；"
+        f"主题围绕箴言：{text.strip()}；文化灵感：{(author or '未知来源').strip()}；"
         "壮丽自然场景，抽象意境，无文字无人物，高质量，精美壁纸。"
     )
 
 
 def compose_quote_background(text: str, author: str, visual_prompt: str = "") -> dict:
+    """拼装背景图信息：生成 prompt → URL 编码 → 返回 image_url 等字段。"""
     prompt = (visual_prompt or "").strip() or build_fallback_visual_prompt(text, author)
+    from urllib.parse import quote
     prompt_encoded = quote(prompt, safe="")
     return {
         "image_url": f"/api/wisdom/render-image?prompt={prompt_encoded}",
@@ -127,14 +130,13 @@ def compose_quote_background(text: str, author: str, visual_prompt: str = "") ->
 
 
 def fetch_remote_image(image_url: str) -> tuple[bytes, str]:
+    """下载远程图片，返回 (bytes, content_type)。"""
     headers = {"User-Agent": "wisdom-site/1.0"}
     if IMAGE_API_KEY:
         headers["Authorization"] = f"Bearer {IMAGE_API_KEY}"
         headers["x-api-key"] = IMAGE_API_KEY
     response = HTTP_SESSION.get(
-        image_url,
-        headers=headers,
-        timeout=DOWNLOAD_HTTP_TIMEOUT_SECONDS,
+        image_url, headers=headers, timeout=DOWNLOAD_HTTP_TIMEOUT_SECONDS,
     )
     response.raise_for_status()
     body = response.content
@@ -145,6 +147,7 @@ def fetch_remote_image(image_url: str) -> tuple[bytes, str]:
 
 
 def build_openai_images_url() -> str:
+    """构建生图 API 完整 URL（兼容多种 base URL 格式）。"""
     base = IMAGE_API_BASE.rstrip("/")
     if base.endswith("/images/generations"):
         return base
@@ -156,11 +159,8 @@ def build_openai_images_url() -> str:
 def request_openai_image_with_size(
     prompt: str, width: int, height: int
 ) -> tuple[bytes, str]:
-    payload = {
-        "prompt": prompt,
-        "n": 1,
-        "size": f"{width}x{height}",
-    }
+    """调用兼容 OpenAI 的生图 API，返回 (bytes, content_type)。"""
+    payload = {"prompt": prompt, "n": 1, "size": f"{width}x{height}"}
     if IMAGE_MODEL:
         payload["model"] = IMAGE_MODEL
 
@@ -171,9 +171,7 @@ def request_openai_image_with_size(
 
     response = HTTP_SESSION.post(
         build_openai_images_url(),
-        json=payload,
-        headers=headers,
-        timeout=IMAGE_HTTP_TIMEOUT_SECONDS,
+        json=payload, headers=headers, timeout=IMAGE_HTTP_TIMEOUT_SECONDS,
     )
     response.raise_for_status()
 
@@ -194,34 +192,29 @@ def request_openai_image_with_size(
 
 
 def render_image_bytes(prompt: str) -> tuple[bytes, str]:
+    """按主尺寸调用生图。"""
     return request_openai_image_with_size(prompt, IMAGE_WIDTH, IMAGE_HEIGHT)
 
 
 def render_image_bytes_with_fallback(prompt: str) -> tuple[bytes, str]:
+    """生图：主尺寸失败时自动尝试回退尺寸。"""
     try:
         return render_image_bytes(prompt)
     except (
-        requests.exceptions.RequestException,
-        KeyError,
-        ValueError,
-        json.JSONDecodeError,
-        base64.binascii.Error,
+        requests.exceptions.RequestException, KeyError, ValueError,
+        json.JSONDecodeError, base64.binascii.Error,
     ) as primary_err:
-        if (
-            IMAGE_WIDTH == IMAGE_FALLBACK_WIDTH
-            and IMAGE_HEIGHT == IMAGE_FALLBACK_HEIGHT
-        ):
+        # 如果主尺寸和回退尺寸相同，不需要重试
+        if (IMAGE_WIDTH == IMAGE_FALLBACK_WIDTH
+                and IMAGE_HEIGHT == IMAGE_FALLBACK_HEIGHT):
             raise primary_err
         try:
             return request_openai_image_with_size(
                 prompt, IMAGE_FALLBACK_WIDTH, IMAGE_FALLBACK_HEIGHT
             )
         except (
-            requests.exceptions.RequestException,
-            KeyError,
-            ValueError,
-            json.JSONDecodeError,
-            base64.binascii.Error,
+            requests.exceptions.RequestException, KeyError, ValueError,
+            json.JSONDecodeError, base64.binascii.Error,
         ) as fallback_err:
             raise ValueError(
                 f"主尺寸({IMAGE_WIDTH}x{IMAGE_HEIGHT})失败: {primary_err}; "
